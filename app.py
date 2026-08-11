@@ -363,16 +363,33 @@ def save_df(dataframe):
 
     session["storage_path"] = storage_path
 
-def df():
+def load_df():
+    """
+    Returns (dataframe, error_message). On any failure, error_message
+    explains exactly what went wrong (no session yet, Supabase download
+    failed, or the stored file couldn't be read) so it can be surfaced
+    directly in the API response instead of a generic 'No data'.
+    """
     storage_path = session.get("storage_path")
     if not storage_path:
-        return None
+        return None, "No upload found in this session — upload a file or load sample data first."
     try:
         raw = supabase.storage.from_(UPLOAD_BUCKET).download(storage_path)
-    except Exception:
+    except Exception as e:
         traceback.print_exc()
-        return None
-    return pd.read_parquet(io.BytesIO(raw))
+        return None, f"Supabase download failed: {type(e).__name__}: {e}"
+    try:
+        return pd.read_parquet(io.BytesIO(raw)), None
+    except Exception as e:
+        traceback.print_exc()
+        return None, f"Couldn't read stored file: {type(e).__name__}: {e}"
+
+def api_response(builder_fn):
+    """Runs builder_fn(dataframe) and wraps it as JSON, or returns the real error."""
+    d, err = load_df()
+    if d is None:
+        return jsonify({'error': err or 'No data'}), 400
+    return jsonify(make_json_safe(builder_fn(d)))
 
 @app.route('/')
 def index():
@@ -408,38 +425,38 @@ def load_sample():
 
 @app.route('/api/overview')
 def api_overview():
-    d = df(); return jsonify(make_json_safe(get_summary(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(get_summary)
 @app.route('/api/categories')
 def api_categories():
-    d = df(); return jsonify(make_json_safe(get_categories(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(get_categories)
 @app.route('/api/income-expense')
 def api_ie():
-    d = df(); return jsonify(make_json_safe(get_income_vs_expense(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(get_income_vs_expense)
 @app.route('/api/monthly')
 def api_monthly():
-    d = df(); return jsonify(make_json_safe(get_monthly_overview(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(get_monthly_overview)
 @app.route('/api/weekly')
 def api_weekly():
-    d = df(); return jsonify(make_json_safe(get_weekly_breakdown(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(get_weekly_breakdown)
 @app.route('/api/trends')
 def api_trends():
-    d = df(); return jsonify(make_json_safe(get_trends(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(get_trends)
 @app.route('/api/anomalies')
 def api_anomalies():
-    d = df(); return jsonify(make_json_safe(detect_anomalies(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(detect_anomalies)
 @app.route('/api/calendar')
 def api_calendar():
-    d = df(); return jsonify(make_json_safe(get_calendar_heatmap(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(get_calendar_heatmap)
 @app.route('/api/health')
 def api_health():
-    d = df(); return jsonify(make_json_safe(get_health_score(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(get_health_score)
 @app.route('/api/insights')
 def api_insights():
-    d = df(); return jsonify(make_json_safe(generate_ai_insights(d))) if d is not None else (jsonify({'error':'No data'}),400)
+    return api_response(generate_ai_insights)
 @app.route('/api/transactions')
 def api_transactions():
-    d = df()
-    if d is None: return jsonify({'error':'No data'}), 400
+    d, err = load_df()
+    if d is None: return jsonify({'error': err or 'No data'}), 400
     page = int(request.args.get('page',1)); per = 20
     s = d.sort_values('date', ascending=False)
     chunk = s.iloc[(page-1)*per:page*per]
