@@ -4,101 +4,107 @@
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20App-brightgreen?style=for-the-badge)](https://financial-spending-analyzer-ioyg.vercel.app/)
 
 ## 📌 Overview
-
-Managing personal finances can be challenging when hundreds of transactions accumulate over time. Most people know how much they earn but often lack visibility into where their money is actually being spent.
-
-The Personal Finance Spending Analyzer is a data analytics project that transforms raw transaction data into meaningful financial insights. Using Python-based data analysis techniques, the project cleans, categorizes, analyzes, and visualizes financial transactions to help users better understand their spending habits and overall financial health.
-
-The project goes beyond basic expense tracking by generating automated insights, calculating a custom Financial Health Score, identifying unusual spending behavior through anomaly detection, and providing budget recommendations based on historical transaction patterns.
-
-An interactive Streamlit dashboard enables users to explore their financial data in a simple and intuitive way.
-
----
-
+ 
+Managing personal finances gets hard once hundreds of transactions pile up. Most people know how much they earn but have little visibility into where it actually goes.
+ 
+The **Personal Finance Spending Analyzer** turns raw transaction data into meaningful financial insight. It cleans, categorizes, stores, analyzes, and visualizes financial transactions to help users understand their spending habits and overall financial health - going beyond basic expense tracking with an automated Financial Health Score, statistical anomaly detection, and budget recommendations based on historical patterns.
+ 
+An interactive dashboard lets users explore their financial data directly in the browser, backed by a persistent PostgreSQL database (via Supabase) so uploaded data isn't lost between sessions.
+ 
 ## 🎯 Project Objectives
-
-The primary goals of this project are:
-
-* Analyze personal transaction data effectively.
-* Understand spending behavior across different categories.
-* Identify areas where expenses can be reduced.
-* Track savings and financial performance over time.
-* Detect unusually large or suspicious expenses.
-* Generate meaningful financial insights automatically.
-* Create a user-friendly analytics dashboard for decision-making.
-
----
-
+ 
+- Analyze personal transaction data effectively
+- Understand spending behavior across categories
+- Identify areas where expenses can be reduced
+- Track savings and financial performance over time
+- Detect unusually large or suspicious expenses
+- Generate meaningful financial insights automatically
+- Persist user data reliably across sessions via a real database
+- Provide a user-friendly analytics dashboard for decision-making
 ## 📂 Dataset Description
-
-The dataset consists of personal financial transactions containing the following attributes:
-
-| Column      | Description                                                     |
-| ----------- | --------------------------------------------------------------- |
-| Date        | Transaction date                                                |
-| Description | Transaction description or merchant                             |
-| Amount      | Transaction amount (positive for income, negative for expenses) |
-| Month       | Month extracted from transaction date                           |
-| Year        | Year extracted from transaction date                            |
-| Day         | Day of the week extracted from transaction date                 |
-| Category    | Expense category assigned through categorization rules          |
-
-### Sample Data
-
-| Date       | Description      | Amount | Category  |
-| ---------- | ---------------- | ------ | --------- |
-| 2025-01-01 | Salary           | 38751  | Income    |
-| 2025-01-01 | Electricity Bill | -2311  | Household |
-| 2025-01-02 | Uber             | -348   | Transport |
-| 2025-01-03 | Amazon           | -2096  | Shopping  |
-
----
-
+ 
+Transactions are uploaded via CSV and persisted to a PostgreSQL database (Supabase), with the following core fields:
+ 
+| Column | Description |
+|---|---|
+| Date | Transaction date |
+| Description | Transaction description or merchant |
+| Amount | Transaction amount (positive for income, negative for expenses) |
+| Month | Month extracted from transaction date |
+| Year | Year extracted from transaction date |
+| Day | Day of the week extracted from transaction date |
+| Category | Expense category assigned through categorization rules |
+ 
+**Sample Data**
+ 
+| Date | Description | Amount | Category |
+|---|---|---|---|
+| 2026-04-01 | Salary | 38751 | Income |
+| 2026-04-02 | Electricity Bill | -2311 | Household |
+| 2026-04-03 | Uber | -348 | Transport |
+| 2026-04-04 | Amazon | -2096 | Shopping |
+ 
 ## ⚙️ Project Workflow
+ 
+**1. Data Collection**
+Transactions are uploaded as CSV through the dashboard and written to a PostgreSQL database hosted on Supabase, replacing the earlier local-CSV-only flow.
+ 
+**2. Data Cleaning**
+- Removing duplicate records
+- Handling missing values
+- Converting date fields into datetime format
+- Validating transaction amounts before persisting to the database
+**3. Feature Engineering**
+- Month, Year, Day of Week extracted from transaction dates
+- Expense categories assigned based on transaction descriptions
+**4. Exploratory Data Analysis (EDA)**
+- Income patterns
+- Expense distribution
+- Category-wise spending
+- Monthly spending trends
+- Savings trends
+- Spending concentration
+**5. Financial Health Evaluation**
+A custom Financial Health Score (0-100) built from:
+- Savings Rate
+- Expense Stability
+- Spending Behavior Metrics
+**6. Automated Insights Generation**
+Rule-based logic identifies:
+- Highest / lowest spending category
+- Best / worst savings month
+- Spending warnings
+- Budget recommendations
+**7. Anomaly Detection**
+Statistical methods (e.g. deviation from category-wise spending norms) flag unusually large transactions that may indicate overspending, unexpected purchases, or irregularities.
+ 
+**8. Dashboard Development**
+An interactive dashboard presents all insights visually, reading live from the Postgres database.
+ 
+## 📊 Exploratory Data Analysis
+ 
+- **Transaction Distribution:** distribution of amounts, common spending ranges
+- **Category Analysis:** total spend by category, average transaction value, category frequency
+- **Time-Series Analysis:** monthly spending/income trends, savings trends
+- **Spending Composition:** category breakdown, percentage contribution
+- **Heatmap Analysis:** monthly spending intensity across categories, seasonal behavior
+- **Correlation Analysis:** relationships between numerical financial metrics
 
-### 1. Data Collection
+- 
+## 🏥 Financial Health Score
+ 
+A single 0-100 metric combining:
+- Savings Rate
+- Expense Consistency
+- Category Spending Distribution
 
-Transaction records are stored in CSV format and loaded into Python for analysis.
 
-### 2. Data Cleaning
-
-The dataset is cleaned by:
-
-* Removing duplicate records
-* Handling missing values
-* Converting date fields into datetime format
-* Validating transaction amounts
-
-### 3. Feature Engineering
-
-Additional features are extracted from transaction dates:
-
-* Month
-* Year
-* Day of Week
-
-Expense categories are assigned based on transaction descriptions.
-
-### 4. Exploratory Data Analysis (EDA)
-
-Comprehensive analysis is performed to understand:
-
-* Income patterns
-* Expense distribution
-* Category-wise spending
-* Monthly spending trends
-* Savings trends
-* Spending concentration
-
-### 5. Financial Health Evaluation
-
-A custom Financial Health Score is developed using:
-
-* Savings Rate
-* Expense Stability
-* Spending Behavior Metrics
-
-The score provides a quick assessment of overall financial performance.
+| Score Range | Financial Status |
+|---|---|
+| 80–100 | Excellent |
+| 60–79 | Good |
+| 40–59 | Average |
+| Below 40 | Needs Improvement |
 
 ### 6. Smart Insights Generation
 
@@ -328,20 +334,6 @@ Personal-Finance-Spending-Analyzer/
 * VS Code
 * Git
 * GitHub
-
----
-
-# ⚠️ Important Notice
-
-## Local Execution Recommended
-
-The application is currently optimized for **local execution**.
-
-Although a public deployment is available, certain dashboard features—including charts, analytics, and dynamic API responses—may not function correctly due to deployment-specific limitations that are still being resolved.
-
-**For the complete experience, please clone the repository and run the application locally.**
-
-This provides access to all dashboard features exactly as intended.
 
 ---
 
