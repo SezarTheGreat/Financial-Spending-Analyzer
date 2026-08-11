@@ -1,5 +1,8 @@
 # 💰 Personal Finance Spending Analyzer
 
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20App-brightgreen?style=for-the-badge)](https://financial-spending-analyzer-ioyg.vercel.app/)
+
 ## 📌 Overview
 
 Managing personal finances can be challenging when hundreds of transactions accumulate over time. Most people know how much they earn but often lack visibility into where their money is actually being spent.
