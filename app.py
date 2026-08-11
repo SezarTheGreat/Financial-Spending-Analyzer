@@ -48,7 +48,7 @@ def make_json_safe(obj):
     return obj
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
+app.secret_key = os.environ.get("SECRET_KEY")
 
 UPLOAD_DIR = "/tmp/finwise_uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
