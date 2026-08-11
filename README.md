@@ -54,9 +54,11 @@ Transactions are uploaded as CSV through the dashboard and written to a PostgreS
 - Handling missing values
 - Converting date fields into datetime format
 - Validating transaction amounts before persisting to the database
+- 
 **3. Feature Engineering**
 - Month, Year, Day of Week extracted from transaction dates
 - Expense categories assigned based on transaction descriptions
+  
 **4. Exploratory Data Analysis (EDA)**
 - Income patterns
 - Expense distribution
@@ -64,71 +66,26 @@ Transactions are uploaded as CSV through the dashboard and written to a PostgreS
 - Monthly spending trends
 - Savings trends
 - Spending concentration
+  
 **5. Financial Health Evaluation**
 A custom Financial Health Score (0-100) built from:
 - Savings Rate
 - Expense Stability
 - Spending Behavior Metrics
+  
 **6. Automated Insights Generation**
 Rule-based logic identifies:
 - Highest / lowest spending category
 - Best / worst savings month
 - Spending warnings
 - Budget recommendations
+  
 **7. Anomaly Detection**
 Statistical methods (e.g. deviation from category-wise spending norms) flag unusually large transactions that may indicate overspending, unexpected purchases, or irregularities.
  
 **8. Dashboard Development**
 An interactive dashboard presents all insights visually, reading live from the Postgres database.
  
-## 📊 Exploratory Data Analysis
- 
-- **Transaction Distribution:** distribution of amounts, common spending ranges
-- **Category Analysis:** total spend by category, average transaction value, category frequency
-- **Time-Series Analysis:** monthly spending/income trends, savings trends
-- **Spending Composition:** category breakdown, percentage contribution
-- **Heatmap Analysis:** monthly spending intensity across categories, seasonal behavior
-- **Correlation Analysis:** relationships between numerical financial metrics
-
-- 
-## 🏥 Financial Health Score
- 
-A single 0-100 metric combining:
-- Savings Rate
-- Expense Consistency
-- Category Spending Distribution
-
-
-| Score Range | Financial Status |
-|---|---|
-| 80–100 | Excellent |
-| 60–79 | Good |
-| 40–59 | Average |
-| Below 40 | Needs Improvement |
-
-### 6. Smart Insights Generation
-
-The system automatically identifies:
-
-* Highest spending category
-* Lowest spending category
-* Best savings month
-* Worst savings month
-* Spending warnings
-* Budget recommendations
-
-### 7. Anomaly Detection
-
-Statistical methods are used to detect unusually large transactions that may indicate:
-
-* Overspending
-* Unexpected purchases
-* Financial irregularities
-
-### 8. Dashboard Development
-
-An interactive Streamlit dashboard is created to present all insights visually.
-
 ---
 
 ## 📊 Exploratory Data Analysis
@@ -282,11 +239,14 @@ The Streamlit dashboard includes:
 ```text
 Personal-Finance-Spending-Analyzer/
 
-├── data/
-│   └── transactions.csv
+├── transactions.csv
+│   
 │
-├── notebooks/
-│   └── finance_analyzer.ipynb
+├── finance.ipynb
+│  
+|
+├── static/
+│   └── (CSS, JS, Chart.js configs)
 │
 ├── app.py
 │
