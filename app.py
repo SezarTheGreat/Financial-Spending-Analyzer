@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session
 import pandas as pd
 import numpy as np
 import os
@@ -7,6 +7,8 @@ import warnings
 warnings.filterwarnings('ignore')
 import math
 import traceback
+import pickle
+import uuid
 
 def make_json_safe(obj):
     """
@@ -46,6 +48,10 @@ def make_json_safe(obj):
     return obj
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
+
+UPLOAD_DIR = "/tmp/finwise_uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 CATEGORY_MAP = {
     'zomato': 'Food & Dining', 'swiggy': 'Food & Dining', 'restaurant': 'Food & Dining',
@@ -312,7 +318,16 @@ def generate_sample_data():
     df['weekday'] = df['date'].dt.day_name()
     return df
 
-_STORE = {}
+def save_df(dataframe):
+    """
+    Persist the uploaded/sample DataFrame to disk instead of an in-process
+    dict, so any worker process can serve any request for this user.
+    The session cookie carries the id that ties requests to their file.
+    """
+    upload_id = str(uuid.uuid4())
+    with open(f"{UPLOAD_DIR}/{upload_id}.pkl", "wb") as fh:
+        pickle.dump(dataframe, fh)
+    session["upload_id"] = upload_id
 
 @app.route('/')
 def index():
@@ -330,9 +345,9 @@ def upload_csv():
     if not f.filename.endswith('.csv'):
         return jsonify({'error': 'Please upload a .csv file'}), 400
     try:
-        df = preprocess(pd.read_csv(f))
-        _STORE['df'] = df
-        return jsonify(make_json_safe({'success': True, 'summary': get_summary(df)}))
+        uploaded_df = preprocess(pd.read_csv(f))
+        save_df(uploaded_df)
+        return jsonify(make_json_safe({'success': True, 'summary': get_summary(uploaded_df)}))
     except Exception as e:
         traceback.print_exc()
         return jsonify({
@@ -342,10 +357,19 @@ def upload_csv():
 
 @app.route('/api/sample')
 def load_sample():
-    _STORE['df'] = generate_sample_data()
-    return jsonify(make_json_safe({'success': True, 'summary': get_summary(_STORE['df'])}))
+    sample_df = generate_sample_data()
+    save_df(sample_df)
+    return jsonify(make_json_safe({'success': True, 'summary': get_summary(sample_df)}))
 
-def df(): return _STORE.get('df')
+def df():
+    upload_id = session.get("upload_id")
+    if not upload_id:
+        return None
+    path = f"{UPLOAD_DIR}/{upload_id}.pkl"
+    if not os.path.exists(path):
+        return None
+    with open(path, "rb") as fh:
+        return pickle.load(fh)
 
 @app.route('/api/overview')
 def api_overview():
