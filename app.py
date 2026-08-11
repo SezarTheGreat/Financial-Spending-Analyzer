@@ -7,8 +7,9 @@ import warnings
 warnings.filterwarnings('ignore')
 import math
 import traceback
-import pickle
+import io
 import uuid
+from supabase import create_client, Client
 
 def make_json_safe(obj):
     """
@@ -48,10 +49,19 @@ def make_json_safe(obj):
     return obj
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY")
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
 
-UPLOAD_DIR = "/tmp/finwise_uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Backend-only Supabase client. SUPABASE_SERVICE_ROLE_KEY must NEVER be
+# sent to the browser or committed to git — set it as a Render env var only.
+# It bypasses Row Level Security, which is exactly why the frontend must
+# never see it: the frontend never talks to Supabase directly, only
+# through this Flask backend.
+SUPABASE_URL = os.environ["SUPABASE_URL"]
+SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+UPLOAD_BUCKET = "finwise-uploads"
+UPLOADS_TABLE = "uploads"
 
 CATEGORY_MAP = {
     'zomato': 'Food & Dining', 'swiggy': 'Food & Dining', 'restaurant': 'Food & Dining',
@@ -320,14 +330,49 @@ def generate_sample_data():
 
 def save_df(dataframe):
     """
-    Persist the uploaded/sample DataFrame to disk instead of an in-process
-    dict, so any worker process can serve any request for this user.
-    The session cookie carries the id that ties requests to their file.
+    Persist the uploaded/sample DataFrame to a private Supabase Storage
+    bucket (as Parquet — smaller and more portable than pickle) and log
+    it in the `uploads` table. The session cookie only ever carries the
+    storage path, never the data itself, so any worker process handling
+    a later request can fetch the same file straight from Supabase.
     """
+    # Each browser session gets a stable id so its files are grouped
+    # together in storage, e.g. finwise-uploads/<session_id>/<upload_id>.parquet
+    session_id = session.get("session_id")
+    if not session_id:
+        session_id = str(uuid.uuid4())
+        session["session_id"] = session_id
+
     upload_id = str(uuid.uuid4())
-    with open(f"{UPLOAD_DIR}/{upload_id}.pkl", "wb") as fh:
-        pickle.dump(dataframe, fh)
-    session["upload_id"] = upload_id
+    storage_path = f"{session_id}/{upload_id}.parquet"
+
+    buf = io.BytesIO()
+    dataframe.to_parquet(buf, index=False)
+    buf.seek(0)
+
+    supabase.storage.from_(UPLOAD_BUCKET).upload(
+        storage_path,
+        buf.getvalue(),
+        {"content-type": "application/octet-stream"},
+    )
+
+    supabase.table(UPLOADS_TABLE).insert({
+        "session_id": session_id,
+        "storage_path": storage_path,
+    }).execute()
+
+    session["storage_path"] = storage_path
+
+def df():
+    storage_path = session.get("storage_path")
+    if not storage_path:
+        return None
+    try:
+        raw = supabase.storage.from_(UPLOAD_BUCKET).download(storage_path)
+    except Exception:
+        traceback.print_exc()
+        return None
+    return pd.read_parquet(io.BytesIO(raw))
 
 @app.route('/')
 def index():
@@ -360,16 +405,6 @@ def load_sample():
     sample_df = generate_sample_data()
     save_df(sample_df)
     return jsonify(make_json_safe({'success': True, 'summary': get_summary(sample_df)}))
-
-def df():
-    upload_id = session.get("upload_id")
-    if not upload_id:
-        return None
-    path = f"{UPLOAD_DIR}/{upload_id}.pkl"
-    if not os.path.exists(path):
-        return None
-    with open(path, "rb") as fh:
-        return pickle.load(fh)
 
 @app.route('/api/overview')
 def api_overview():
