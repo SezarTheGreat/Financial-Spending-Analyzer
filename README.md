@@ -181,7 +181,7 @@ These insights help convert raw transaction data into actionable information.
 
 ## 📈 Dashboard Features
 
-The Streamlit dashboard includes:
+The dashboard includes:
 
 ### KPI Cards
 
