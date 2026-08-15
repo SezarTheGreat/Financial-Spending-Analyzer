@@ -1,0 +1,173 @@
+{
+  "investor_name": "JYOTISHMAN BARMAN",
+  "pan": "ABCDE1234F",
+  "email": "jyotishman@finwise.io",
+  "statement_period": "15-Aug-2025 to 14-Aug-2026",
+  "total_current_value": 10796.28,
+  "total_cost_value": 10412.25,
+  "total_gain": 384.03,
+  "holdings": [
+    {
+      "folio_number": "91028371/01",
+      "scheme_name": "SBI Ultra Short Duration Fund - Direct Plan - Growth",
+      "isin": "INF200K01TK9",
+      "amfi_code": "103176",
+      "plan_type": "DIRECT",
+      "category": "Debt",
+      "units": 83.758,
+      "nav": 36.00,
+      "current_value": 3015.29,
+      "cost_value": 3000.00,
+      "unrealized_gain": 15.29,
+      "return_percentage": 0.51,
+      "portfolio_weight_pct": 27.93,
+      "transactions": [
+        { "date": "2026-05-10", "description": "Purchase", "amount": 3000.0, "units": 83.758, "nav": 35.82, "type": "PURCHASE" }
+      ]
+    },
+    {
+      "folio_number": "81923041/12",
+      "scheme_name": "Invesco India Gold ETF Fund of Fund - Direct Plan - Growth",
+      "isin": "INF205K01235",
+      "amfi_code": "115744",
+      "plan_type": "DIRECT",
+      "category": "Commodities",
+      "units": 72.302,
+      "nav": 21.20,
+      "current_value": 1532.80,
+      "cost_value": 1332.54,
+      "unrealized_gain": 200.26,
+      "return_percentage": 15.03,
+      "portfolio_weight_pct": 14.20,
+      "transactions": [
+        { "date": "2026-05-08", "description": "SIP Purchase", "amount": 1332.54, "units": 72.302, "nav": 18.43, "type": "PURCHASE" }
+      ]
+    },
+    {
+      "folio_number": "72819033/45",
+      "scheme_name": "Bandhan Small Cap Fund - Direct Plan - Growth",
+      "isin": "INF194K01876",
+      "amfi_code": "147944",
+      "plan_type": "DIRECT",
+      "category": "Small Cap",
+      "units": 37.442,
+      "nav": 35.00,
+      "current_value": 1310.48,
+      "cost_value": 1200.00,
+      "unrealized_gain": 110.48,
+      "return_percentage": 9.21,
+      "portfolio_weight_pct": 12.14,
+      "transactions": [
+        { "date": "2026-05-09", "description": "Purchase", "amount": 1200.0, "units": 37.442, "nav": 32.05, "type": "PURCHASE" }
+      ]
+    },
+    {
+      "folio_number": "61928344/88",
+      "scheme_name": "Aditya Birla Sun Life Credit Risk Fund - Direct Plan - Growth",
+      "isin": "INF209K01912",
+      "amfi_code": "119551",
+      "plan_type": "DIRECT",
+      "category": "Debt",
+      "units": 49.087,
+      "nav": 21.00,
+      "current_value": 1030.83,
+      "cost_value": 1000.01,
+      "unrealized_gain": 30.82,
+      "return_percentage": 3.08,
+      "portfolio_weight_pct": 9.55,
+      "transactions": [
+        { "date": "2026-05-11", "description": "Purchase", "amount": 1000.01, "units": 49.087, "nav": 20.37, "type": "PURCHASE" }
+      ]
+    },
+    {
+      "folio_number": "41829033/11",
+      "scheme_name": "Quant Multi Asset Allocation Fund - Direct Plan - Growth",
+      "isin": "INF966L01874",
+      "amfi_code": "146885",
+      "plan_type": "DIRECT",
+      "category": "Multi Asset",
+      "units": 8.516,
+      "nav": 120.00,
+      "current_value": 1021.94,
+      "cost_value": 1000.00,
+      "unrealized_gain": 21.94,
+      "return_percentage": 2.19,
+      "portfolio_weight_pct": 9.47,
+      "transactions": [
+        { "date": "2026-05-15", "description": "Purchase", "amount": 1000.0, "units": 8.516, "nav": 117.43, "type": "PURCHASE" }
+      ]
+    },
+    {
+      "folio_number": "51928374/09",
+      "scheme_name": "Parag Parikh Flexi Cap Fund - Direct Plan - Growth",
+      "isin": "INF879O01019",
+      "amfi_code": "122639",
+      "plan_type": "DIRECT",
+      "category": "Flexi Cap",
+      "units": 11.022,
+      "nav": 91.80,
+      "current_value": 1011.79,
+      "cost_value": 1000.00,
+      "unrealized_gain": 11.79,
+      "return_percentage": 1.18,
+      "portfolio_weight_pct": 9.37,
+      "transactions": [
+        { "date": "2026-05-12", "description": "Purchase", "amount": 1000.0, "units": 11.022, "nav": 90.73, "type": "PURCHASE" }
+      ]
+    },
+    {
+      "folio_number": "31928477/22",
+      "scheme_name": "Nippon India Growth Mid Cap Fund - Direct Plan - Growth",
+      "isin": "INF204K01974",
+      "amfi_code": "100377",
+      "plan_type": "DIRECT",
+      "category": "Mid Cap",
+      "units": 0.222,
+      "nav": 3600.00,
+      "current_value": 799.99,
+      "cost_value": 750.00,
+      "unrealized_gain": 49.99,
+      "return_percentage": 6.67,
+      "portfolio_weight_pct": 7.41,
+      "transactions": [
+        { "date": "2026-05-16", "description": "Purchase", "amount": 750.0, "units": 0.222, "nav": 3378.38, "type": "PURCHASE" }
+      ]
+    },
+    {
+      "folio_number": "21839201/55",
+      "scheme_name": "HDFC Silver ETF Fund of Fund - Direct Plan - Growth",
+      "isin": "INF179K01928",
+      "amfi_code": "150064",
+      "plan_type": "DIRECT",
+      "category": "Commodities",
+      "units": 47.344,
+      "nav": 13.00,
+      "current_value": 615.47,
+      "cost_value": 679.70,
+      "unrealized_gain": -64.23,
+      "return_percentage": -9.45,
+      "portfolio_weight_pct": 5.70,
+      "transactions": [
+        { "date": "2026-05-19", "description": "Purchase", "amount": 679.70, "units": 47.344, "nav": 14.36, "type": "PURCHASE" }
+      ]
+    },
+    {
+      "folio_number": "11928374/66",
+      "scheme_name": "Edelweiss US Technology Equity FoF - Direct Plan - Growth",
+      "isin": "INF754K01DF1",
+      "amfi_code": "148332",
+      "plan_type": "DIRECT",
+      "category": "International Equity",
+      "units": 11.443,
+      "nav": 40.00,
+      "current_value": 457.70,
+      "cost_value": 450.00,
+      "unrealized_gain": 7.70,
+      "return_percentage": 1.71,
+      "portfolio_weight_pct": 4.24,
+      "transactions": [
+        { "date": "2026-05-21", "description": "Purchase", "amount": 450.0, "units": 11.443, "nav": 39.33, "type": "PURCHASE" }
+      ]
+    }
+  ]
+}
