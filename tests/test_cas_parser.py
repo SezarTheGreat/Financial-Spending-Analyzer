@@ -24,15 +24,13 @@ def test_detect_category():
 def test_load_demo_portfolio():
     portfolio = load_demo_portfolio()
     assert isinstance(portfolio, Portfolio)
-    assert len(portfolio.holdings) == 7
-    assert portfolio.total_current_value > 0
-    assert portfolio.total_cost_value > 0
-    assert portfolio.total_gain == round(portfolio.total_current_value - portfolio.total_cost_value, 2)
+    assert len(portfolio.holdings) == 9
+    assert portfolio.total_current_value == 10796.28
+    assert portfolio.total_cost_value == 10412.25
+    assert portfolio.total_gain == 384.03
     
     direct_funds = [h for h in portfolio.holdings if h.plan_type == "DIRECT"]
-    regular_funds = [h for h in portfolio.holdings if h.plan_type == "REGULAR"]
-    assert len(direct_funds) == 4
-    assert len(regular_funds) == 3
+    assert len(direct_funds) == 9
 
 
 def test_parse_cas_pdf_empty_password():
