@@ -524,7 +524,10 @@ def portfolio_analyze_demo():
     db_service.save_portfolio(audit_id, portfolio)
     db_service.save_holdings(audit_id, portfolio.holdings)
     db_service.save_audit_report(audit_response)
-@app.route('/api/portfolio/re-evaluate-risk', methods=['POST'])
+
+    return jsonify(audit_response.model_dump(mode="json"))
+
+@app.route('/api/portfolio/re-evaluate-risk', methods=['POST'])
 def portfolio_re_evaluate_risk():
     req_json = request.get_json(silent=True) or {}
     audit_id = req_json.get('audit_id') or request.form.get('audit_id')
