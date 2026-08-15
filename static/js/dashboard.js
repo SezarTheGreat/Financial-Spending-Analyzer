@@ -63,6 +63,10 @@ function switchSection(sec) {
     if (sidebarHealth) sidebarHealth.style.display = 'none';
     if (pageSub) pageSub.textContent = 'Bank Statement & Spending Analytics Engine';
   }
+
+  const mainEl = document.querySelector('.main');
+  if (mainEl) mainEl.scrollTop = 0;
+  window.scrollTo(0, 0);
 }
 
 // ── App Initialization ──────────────────────────────────────────
@@ -637,27 +641,30 @@ function renderSpatialFlowerVenn(overlap, holdings) {
             data-b="${p.fund_b}"
             data-pct="${pct}" />
       
-      <!-- Overlap Text Riding on the Outer Clear Section of the Line (30% offset from node) -->
+      <!-- Overlap Text Riding in the Middle of the Length of the Line on Top -->
       <text class="chord-line-text chord-${sanitizeId(p.fund_a)} chord-${sanitizeId(p.fund_b)}"
-            dy="-4"
-            font-size="10"
+            dy="-6"
+            font-size="10.5"
             font-weight="800"
             style="pointer-events:none;">
-        <textPath href="#${pathId}" startOffset="30%" text-anchor="middle"
-                  stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+        <textPath href="#${pathId}" startOffset="50%" text-anchor="middle"
+                  stroke="#FFFFFF" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
           ${pct}%
         </textPath>
-        <textPath href="#${pathId}" startOffset="30%" text-anchor="middle" fill="${strokeColor}">
+        <textPath href="#${pathId}" startOffset="50%" text-anchor="middle" fill="${strokeColor}">
           ${pct}%
         </textPath>
       </text>
     `;
   });
 
-  // Central Core Hub (Rendered on top of chords for clean occlusion)
+  // Top-Right Corner PORTFOLIO Badge
   svgHtml += `
-    <circle cx="${cx}" cy="${cy}" r="34" fill="#FFFFFF" stroke="rgba(17,24,39,0.12)" stroke-width="2" />
-    <text x="${cx}" y="${cy + 4}" text-anchor="middle" font-size="11" font-weight="800" fill="#111827" letter-spacing="1">PORTFOLIO</text>
+    <g transform="translate(${width - 130}, 16)" class="portfolio-canvas-badge">
+      <rect x="0" y="0" width="112" height="26" rx="13" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.5" />
+      <circle cx="14" cy="13" r="4" fill="#4F46E5" />
+      <text x="25" y="17" font-size="10" font-weight="800" fill="#374151" letter-spacing="1.5">PORTFOLIO</text>
+    </g>
   `;
 
   // Draw Fund Petal Nodes with Clean Outer Radial Label Placement
@@ -734,13 +741,14 @@ function renderSpatialFlowerVenn(overlap, holdings) {
     nodeEl.onmouseenter = (e) => {
       highlightFundPetal(fundId);
       if (tooltip && nodeObj) {
-        const relatedPairs = pairs.filter(p => p.fund_a === fundId || p.fund_b === fundId);
-        const topOverlap = relatedPairs.sort((a, b) => b.overlap_percentage - a.overlap_percentage)[0];
+        const activeLinks = pairs.filter(p => (p.fund_a === fundId || p.fund_b === fundId) && (p.overlap_percentage > 0));
+        const topOverlap = activeLinks.slice().sort((a, b) => b.overlap_percentage - a.overlap_percentage)[0];
+        const linkCount = activeLinks.length;
         
         tooltip.innerHTML = `
           <strong style="color:${nodeObj.color};">${nodeObj.fullName}</strong>
-          <div style="margin-top:4px;font-size:0.7rem;color:#D1D5DB;">
-            ${relatedPairs.length} Overlapping Links · Max Overlap: <strong>${topOverlap ? topOverlap.overlap_percentage : 0}%</strong>
+          <div style="margin-top:5px;font-size:0.75rem;color:#E5E7EB;">
+            <span style="font-weight:700;color:${linkCount > 0 ? '#34D399' : '#9CA3AF'};">${linkCount}</span> Overlapping Link${linkCount === 1 ? '' : 's'} · Max Overlap: <strong>${topOverlap ? topOverlap.overlap_percentage : 0}%</strong>
           </div>
         `;
         tooltip.style.opacity = '1';
@@ -805,7 +813,7 @@ function resetFlowerHighlights() {
 }
 
 function selectFundForInspection(fundId, nodeObj, pairs, barTitle, tagsContainer) {
-  const related = pairs.filter(p => p.fund_a === fundId || p.fund_b === fundId);
+  const related = pairs.filter(p => (p.fund_a === fundId || p.fund_b === fundId) && (p.overlap_percentage > 0));
   if (barTitle) {
     barTitle.innerHTML = `Connected Overlap Links for: <strong style="color:${nodeObj.color}">${nodeObj.fullName}</strong>`;
   }
@@ -1356,4 +1364,261 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── AI Chatbot Logic (Groww G.1 Architecture & Claude Artifacts) ───
+const chatHistory = [];
+const sessionId = 'session_' + Math.random().toString(36).substring(2, 11);
+let _activeChatCharts = {};
+
+function formatChatMarkdown(raw) {
+  if (!raw) return '';
+  let html = raw.trim();
+
+  // 1. Convert Display Math ($$...$$) into Claude-Style Formula Environment Card
+  html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+    return `<div class="formula-env-card">
+      <div class="formula-env-header">
+        <span class="formula-env-badge">🧮 Formula Environment</span>
+      </div>
+      <div class="formula-env-body">$$${formula.trim()}$$</div>
+    </div>`;
+  });
+
+  // 2. Convert Markdown tables to HTML table
+  const tableRegex = /((?:\|[^\n]+\|\r?\n)+)/g;
+  html = html.replace(tableRegex, (match) => {
+    const lines = match.trim().split('\n').filter(l => l.trim().startsWith('|'));
+    if (lines.length < 2) return match;
+    
+    let tableHtml = '<div class="table-responsive"><table class="mf-table" style="margin:6px 0;">';
+    let isHeader = true;
+
+    lines.forEach((line, idx) => {
+      if (line.replace(/[\s|:-]/g, '').length === 0) {
+        isHeader = false;
+        return;
+      }
+
+      const cells = line.split('|').slice(1, -1).map(c => c.trim());
+      if (isHeader && idx === 0) {
+        tableHtml += '<thead><tr>' + cells.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+      } else {
+        tableHtml += '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+      }
+    });
+
+    tableHtml += '</tbody></table></div>';
+    return tableHtml;
+  });
+
+  // 3. Headings
+  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+
+  // 4. Bold & Italic
+  html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+  // 5. Horizontal Rules
+  html = html.replace(/^---$/gim, '<hr>');
+
+  // 6. Bullet Lists
+  html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>)/gims, '<ul>$1</ul>');
+  html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+  // 7. Inline code
+  html = html.replace(/`([^`]+)`/g, '<code style="background:#F3F4F6;padding:2px 5px;border-radius:4px;font-family:monospace;font-size:0.85em;">$1</code>');
+
+  // 8. Clean paragraphs without runaway linebreaks
+  const blocks = html.split(/\n\s*\n/);
+  html = blocks.map(b => {
+    b = b.trim();
+    if (!b) return '';
+    if (b.startsWith('<h3') || b.startsWith('<ul') || b.startsWith('<div') || b.startsWith('<hr')) {
+      return b;
+    }
+    return `<p>${b.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+
+  return html;
+}
+
+function appendChatMessage(role, text, chartSpec = null) {
+  const container = document.getElementById('chatHistory');
+  if (!container) return;
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `chat-message ${role}`;
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.innerHTML = formatChatMarkdown(text);
+
+  // If a chart specification was returned, render an interactive Chart.js artifact
+  if (chartSpec && typeof chartSpec === 'object' && chartSpec.type) {
+    const chartId = 'chat-chart-' + Math.random().toString(36).substring(2, 9);
+    const chartCard = document.createElement('div');
+    chartCard.className = 'chat-chart-card';
+    chartCard.innerHTML = `
+      <div class="chat-chart-header">
+        <div class="chat-chart-title"><span>📈</span> ${chartSpec.title || 'Visual Quantitative Artifact'}</div>
+      </div>
+      <div class="chat-chart-canvas-wrap">
+        <canvas id="${chartId}"></canvas>
+      </div>
+    `;
+    bubble.appendChild(chartCard);
+
+    // Initialize Chart.js after appending to DOM
+    setTimeout(() => {
+      const canvas = document.getElementById(chartId);
+      if (canvas && window.Chart) {
+        if (_activeChatCharts[chartId]) {
+          _activeChatCharts[chartId].destroy();
+        }
+        _activeChatCharts[chartId] = new Chart(canvas, {
+          type: chartSpec.type,
+          data: {
+            labels: chartSpec.labels,
+            datasets: chartSpec.datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: chartSpec.type !== 'bar' || chartSpec.datasets.length > 1,
+                position: 'top',
+                labels: { font: { size: 11, family: "'DM Sans', sans-serif" }, boxWidth: 12 }
+              },
+              tooltip: {
+                backgroundColor: '#111827',
+                titleFont: { size: 12, family: "'DM Sans', sans-serif", weight: 'bold' },
+                bodyFont: { size: 11, family: "'DM Sans', sans-serif" },
+                padding: 10,
+                cornerRadius: 8
+              }
+            },
+            scales: chartSpec.type === 'doughnut' ? {} : {
+              x: { grid: { display: false }, ticks: { font: { size: 10, family: "'DM Sans', sans-serif" } } },
+              y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10, family: "'DM Sans', sans-serif" } } }
+            }
+          }
+        });
+        setTimeout(() => {
+          container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        }, 100);
+      }
+    }, 60);
+  }
+
+  msgDiv.appendChild(bubble);
+  container.appendChild(msgDiv);
+
+  // Render KaTeX mathematical expressions in the message element
+  if (window.renderMathInElement) {
+    try {
+      window.renderMathInElement(bubble, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false }
+        ],
+        throwOnError: false
+      });
+    } catch (e) {
+      console.warn('KaTeX rendering notice:', e);
+    }
+  }
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTypingIndicator() {
+  const container = document.getElementById('chatHistory');
+  if (!container) return null;
+  const indId = 'typing-' + Date.now();
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-message model typing-msg';
+  msgDiv.id = indId;
+  msgDiv.innerHTML = `
+    <div class="msg-bubble" style="background:#FFFFFF;border:1px solid var(--border);">
+      <div class="typing-dots">
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+      </div>
+      <span style="font-size:0.78rem;color:var(--muted);margin-left:6px;">Analyzing with Quant Engine &amp; rendering artifacts…</span>
+    </div>
+  `;
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+  return indId;
+}
+
+function removeTypingIndicator(indId) {
+  if (!indId) return;
+  const el = document.getElementById(indId);
+  if (el) el.remove();
+}
+
+function applyTestPrompt(promptText) {
+  const inputEl = document.getElementById('chatInput');
+  if (!inputEl) return;
+  inputEl.value = promptText;
+  sendChatMessage();
+}
+
+function handleChatKeyPress(event) {
+  if (event.key === 'Enter') {
+    sendChatMessage();
+  }
+}
+
+async function sendChatMessage() {
+  const inputEl = document.getElementById('chatInput');
+  const btnEl = document.getElementById('chatSendBtn');
+  const message = inputEl.value.trim();
+  if (!message) return;
+
+  // Optimistic UI update
+  inputEl.value = '';
+  inputEl.disabled = true;
+  btnEl.disabled = true;
+  appendChatMessage('user', message);
+
+  const typingId = showTypingIndicator();
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        session_id: sessionId,
+        audit_id: _currentAudit?.audit_id || null,
+        history: chatHistory,
+        risk_profile: _currentRiskProfile
+      })
+    });
+
+    removeTypingIndicator(typingId);
+
+    if (res.ok) {
+      const data = await res.json();
+      appendChatMessage('model', data.reply, data.chart);
+      chatHistory.push({ role: 'user', content: message });
+      chatHistory.push({ role: 'assistant', content: data.reply });
+    } else {
+      appendChatMessage('model', "### ⚠️ Advisor Connection Alert\nUnable to fetch insights from the Quant Advisor. Please verify that the engine is active.");
+    }
+  } catch (err) {
+    removeTypingIndicator(typingId);
+    console.error(err);
+    appendChatMessage('model', "### ⚠️ Network Error\nUnable to connect to the FinWise AI Advisor server.");
+  } finally {
+    inputEl.disabled = false;
+    btnEl.disabled = false;
+    inputEl.focus();
+  }
 }
