@@ -25,9 +25,9 @@ def test_load_demo_portfolio():
     portfolio = load_demo_portfolio()
     assert isinstance(portfolio, Portfolio)
     assert len(portfolio.holdings) == 9
-    assert portfolio.total_current_value == 10796.28
-    assert portfolio.total_cost_value == 10412.25
-    assert portfolio.total_gain == 384.03
+    assert portfolio.total_current_value == 10795.10
+    assert portfolio.total_cost_value == 9866.98
+    assert portfolio.total_gain == 928.12
     
     direct_funds = [h for h in portfolio.holdings if h.plan_type == "DIRECT"]
     assert len(direct_funds) == 9

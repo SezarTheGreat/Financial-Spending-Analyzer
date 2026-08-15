@@ -304,51 +304,55 @@ class QuantEngine:
     ) -> Tuple[FormTier, str]:
         if cagr_1y is None and cagr_3y is None:
             return "On-Track", "Insufficient historical NAV series to establish multi-year rolling trend; tracking category baseline."
-        """
-        4-Tier Form Classifier matching institutional standards (PowerUp Money / CRISIL Rank):
-        - In-Form (🟢): Top-quartile performer over rolling horizons; generating positive alpha.
-        - On-Track (🟡): Consistent steady performance meeting or tracking category benchmark.
-        - Off-Track (🟠): Moderate trailing performance lagging category benchmark.
-        - Out-of-Form (🔴): Chronic bottom-quartile laggard flagged for exit.
-        """
+
         a1 = alpha_1y if alpha_1y is not None else 0.0
         a3 = alpha_3y if alpha_3y is not None else 0.0
+        c1 = cagr_1y if cagr_1y is not None else 0.0
+        c3 = cagr_3y if cagr_3y is not None else 0.0
 
-        # 1. Debt & Cash Instruments (Liquid, Ultra Short, Debt, Credit Risk)
-        if "Debt" in category or category in ["Liquid", "Credit Risk Debt", "Ultra Short Debt"]:
-            if a1 >= 1.50 and a3 >= 1.50:
-                return "In-Form", f"Superior yield spread delivering +{a3:.2f}% 3Y alpha over category benchmark."
-            elif a1 >= -0.75 and a3 >= -0.75:
-                return "On-Track", f"Steady fixed-income yield tracking benchmark ({cagr_1y}% 1Y CAGR)."
-            elif a1 >= -2.0 or a3 >= -2.0:
-                return "Off-Track", f"Yield lagging category benchmark by {abs(min(a1, a3)):.2f}%."
-            else:
-                return "Out-of-Form", f"Chronic duration/credit drag underperforming benchmark by {abs(min(a1, a3)):.2f}%."
+        # State-Machine Rule 1: Trailing capital drawdown / negative 1Y performance
+        # If fund is actively losing money over trailing 1Y when category benchmark is positive -> Off-Track
+        if c1 < 0.0:
+            if a1 < -3.0 or c1 < -5.0:
+                return "Out-of-Form", f"Negative trailing return ({c1:.2f}% 1Y) with severe benchmark drag ({a1:+.2f}% alpha)."
+            return "Off-Track", f"Negative trailing return ({c1:.2f}% 1Y CAGR) lagging category benchmark by {abs(a1):.2f}%."
 
-        # 2. Passive Commodity ETFs / Bullion FoFs (Gold / Silver)
+        # State-Machine Rule 2: Passive Commodity ETFs / Bullion FoFs (Gold / Silver)
         if category == "Commodities":
-            if a1 < -3.0 or a3 < -3.0:
-                return "Off-Track", f"Tracking error causing {abs(min(a1, a3)):.2f}% drag against spot bullion."
-            elif a1 < -6.0 or a3 < -6.0:
-                return "Out-of-Form", f"Severe commodity divergence lagging spot prices by {abs(min(a1, a3)):.2f}%."
+            if a1 > 1.5 or (c1 >= 18.0 and a1 >= 0.0):
+                return "In-Form", f"Strong commodity momentum (+{c1:.2f}% 1Y CAGR) generating +{a1:+.2f}% alpha over bullion benchmark."
+            elif a1 >= -1.5:
+                return "On-Track", f"Tracking physical bullion benchmark closely ({c1:.2f}% 1Y CAGR, {a1:+.2f}% alpha)."
+            elif a1 < -4.0:
+                return "Out-of-Form", f"Severe tracking error causing {abs(a1):.2f}% drag against spot metal prices."
             else:
-                return "On-Track", f"Passive bullion allocation tracking spot metal prices (1Y CAGR: {cagr_1y}%)."
+                return "Off-Track", f"Tracking error causing {abs(a1):.2f}% drag against bullion benchmark."
 
-        # 3. Active Equity / Multi-Asset / International Strategies
-        if (a1 >= 2.00 and a3 >= 2.00) or (a1 >= 8.00 and a3 >= 0.0):
-            tier: FormTier = "In-Form"
-            rationale = f"Top-quartile alpha generator delivering +{a1:.2f}% 1Y and +{a3:.2f}% 3Y alpha over benchmark."
-        elif a1 < -5.00 and a3 < -3.00:
-            tier: FormTier = "Out-of-Form"
-            rationale = f"Chronic bottom-quartile underperformance lagging benchmark by {abs(a3):.2f}% (3Y)."
-        elif a1 < -1.50 or a3 < -1.50:
-            tier: FormTier = "Off-Track"
-            rationale = f"Recent performance cooling and lagging category benchmark by {abs(min(a1, a3)):.2f}%."
+        # State-Machine Rule 3: Debt & Fixed Income (Ultra Short, Credit Risk, Liquid, General Debt)
+        if "Debt" in category or category in ["Liquid", "Credit Risk Debt", "Ultra Short Debt"]:
+            if a1 > 0.5 or a3 > 0.5:
+                return "In-Form", f"Top-tier stability and yield (+{c1:.2f}% 1Y CAGR) generating +{a1:+.2f}% alpha over debt benchmark."
+            elif a1 >= -0.5 and a3 >= -0.5:
+                return "On-Track", f"Steady fixed-income yield tracking benchmark ({c1:.2f}% 1Y CAGR, {a1:+.2f}% alpha)."
+            elif a1 < -1.5 or a3 < -1.5:
+                return "Out-of-Form", f"Chronic duration/credit drag lagging debt benchmark by {abs(min(a1, a3)):.2f}%."
+            else:
+                return "Off-Track", f"Yield lagging category benchmark by {abs(a1):.2f}%."
+
+        # State-Machine Rule 4: Active Equity / Multi-Asset / International
+        # In-Form: alpha_1y > 1.5% and positive momentum (or alpha_3y > 1.5% and alpha_1y >= 0.0%)
+        # On-Track: -1.5% <= alpha_1y <= 1.5%
+        # Off-Track: -4.0% <= alpha_1y < -1.5%
+        # Out-of-Form: alpha_1y < -4.0%
+        if a1 > 1.5 or (a3 > 1.5 and a1 >= 0.0):
+            return "In-Form", f"Top-quartile alpha generator delivering +{a1:+.2f}% 1Y alpha ({c1:.2f}% 1Y CAGR) over category benchmark."
+        elif a1 < -4.0 or (a1 < -2.0 and a3 < -2.0):
+            return "Out-of-Form", f"Chronic bottom-quartile underperformance lagging category benchmark by {abs(a1):.2f}% (1Y) and {abs(a3):.2f}% (3Y)."
+        elif a1 < -1.5:
+            return "Off-Track", f"Trailing performance lagging category benchmark by {abs(a1):.2f}% (1Y CAGR: {c1:.2f}%)."
         else:
-            tier: FormTier = "On-Track"
-            rationale = f"Consistent baseline tracking category benchmark (1Y: {cagr_1y}%, 3Y: {cagr_3y}%)."
+            return "On-Track", f"Consistent baseline tracking category benchmark (1Y: {c1:.2f}%, alpha: {a1:+.2f}%)."
 
-        return tier, rationale
 
     async def evaluate_fund_form(self, holdings: List[Holding], rolling_cagrs: List[FundRollingCAGR]) -> List[FundFormDiagnostic]:
         """
