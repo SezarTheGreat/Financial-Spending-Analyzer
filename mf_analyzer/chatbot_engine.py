@@ -189,6 +189,8 @@ class ChatbotAdvisorEngine:
                     break
             except Exception as ex:
                 logger.warning(f"Failed generation with {m}: {ex}")
+                if "RESOURCE_EXHAUSTED" in str(ex) or "429" in str(ex):
+                    break
                 continue
 
         if not reply_text:
