@@ -1458,42 +1458,53 @@ function formatChatMarkdown(raw) {
   // 6. Inline code
   text = text.replace(/`([^`]+)`/g, '<code style="background:#F1F5F9;color:#0F172A;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:0.88em;border:1px solid #E2E8F0;">$1</code>');
 
-  // 7. Non-Greedy Unordered Lists (bullet lines)
-  text = text.replace(/(?:^\s*[-*]\s+.*(?:\r?\n|$))+/gm, (listBlock) => {
-    const items = listBlock
-      .trim()
-      .split('\n')
-      .map(line => line.replace(/^\s*[-*]\s+/, '').trim())
-      .filter(line => line.length > 0)
-      .map(item => `<li>${item}</li>`)
-      .join('');
-    return `<ul>${items}</ul>\n\n`;
-  });
+  // 7. Parse line-by-line for robust Markdown lists (ordered lists with nested bullets)
+  const lines = text.split('\n');
+  const out = [];
+  let inUl = false;
+  let inOl = false;
 
-  // 8. Non-Greedy Ordered Lists (numbered lines)
-  text = text.replace(/(?:^\s*\d+\.\s+.*(?:\r?\n|$))+/gm, (listBlock) => {
-    const items = listBlock
-      .trim()
-      .split('\n')
-      .map(line => line.replace(/^\s*\d+\.\s+/, '').trim())
-      .filter(line => line.length > 0)
-      .map(item => `<li>${item}</li>`)
-      .join('');
-    return `<ol>${items}</ol>\n\n`;
-  });
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trim = line.trim();
 
-  // 9. Split into discrete block-level sections and wrap prose in <p>
-  const rawBlocks = text.split(/\n\s*\n+/);
-  let html = rawBlocks.map(b => {
-    b = b.trim();
-    if (!b) return '';
-    if (b.startsWith('<h3') || b.startsWith('<ul') || b.startsWith('<ol') || b.startsWith('<div') || b.startsWith('<hr') || b.startsWith('___MATH_BLOCK_')) {
-      return b;
+    if (!trim) {
+      if (inUl) { out.push('</ul>'); inUl = false; }
+      if (inOl) { out.push('</ol>'); inOl = false; }
+      continue;
     }
-    return `<p>${b.replace(/\n/g, '<br>')}</p>`;
-  }).join('');
 
-  // 10. Re-inject Math Blocks without parent list pollution
+    const olMatch = trim.match(/^(\d+)\.\s+(.*)$/);
+    const subUlMatch = line.match(/^\s{2,}[-*]\s+(.*)$/);
+    const ulMatch = trim.match(/^[-*]\s+(.*)$/);
+
+    if (subUlMatch && inOl) {
+      out.push(`<ul style="margin:4px 0 8px 18px; padding-left:14px; list-style-type:disc;"><li>${subUlMatch[1]}</li></ul>`);
+    } else if (olMatch) {
+      if (inUl) { out.push('</ul>'); inUl = false; }
+      if (!inOl) { out.push('<ol style="margin:8px 0; padding-left:22px;">'); inOl = true; }
+      out.push(`<li value="${olMatch[1]}" style="margin-bottom:6px;">${olMatch[2]}</li>`);
+    } else if (ulMatch) {
+      if (inOl) { out.push('</ol>'); inOl = false; }
+      if (!inUl) { out.push('<ul style="margin:8px 0; padding-left:20px; list-style-type:disc;">'); inUl = true; }
+      out.push(`<li style="margin-bottom:4px;">${ulMatch[1]}</li>`);
+    } else {
+      if (inUl) { out.push('</ul>'); inUl = false; }
+      if (inOl) { out.push('</ol>'); inOl = false; }
+      if (trim.startsWith('<h3') || trim.startsWith('<div') || trim.startsWith('<hr') || trim.startsWith('___MATH_BLOCK_')) {
+        out.push(trim);
+      } else {
+        out.push(`<p style="margin:6px 0;">${trim}</p>`);
+      }
+    }
+  }
+
+  if (inUl) out.push('</ul>');
+  if (inOl) out.push('</ol>');
+
+  let html = out.join('\n');
+
+  // 8. Re-inject Math Blocks without parent list pollution
   mathBlocks.forEach((block, idx) => {
     html = html.replace(`___MATH_BLOCK_${idx}___`, block);
   });

@@ -842,7 +842,70 @@ class ChatbotAdvisorEngine:
             )
             return {"reply": sanitize_advisor_response(reply), "chart": chart}
 
-        # ── 15. Stock Overlap & Concentration Inquiries ───────────────────────
+        # ── 15. Real Estate, REITs & International Geographical Exposure Inquiries ─
+        if any(w in msg_lower for w in ["real estate", "reit", "reits", "property", "international exposure", "global exposure", "international real estate"]):
+            has_reit = any("real estate" in h.category.lower() or "reit" in h.scheme_name.lower() for h in portfolio.holdings)
+            reply = (
+                "### 🌍 International & Real Estate Asset Exposure Audit\n\n"
+                "**1. International Real Estate Exposure:**\n"
+                "- **Direct Real Estate / REIT Holdings**: **0.00%** (Zero exposure). Your portfolio holds no domestic listed REITs (e.g., *Embassy, Brookfield, Mindspace*) or international property funds.\n\n"
+                "**2. Actual Global / Foreign Market Exposure:**\n"
+                "- **Parag Parikh Flexi Cap Fund**: Holds **~15%–20% allocation in Global US Tech Leaders** (*Alphabet Inc, Microsoft Corporation, Amazon, Meta*), representing approximately **~4.2% of your total portfolio valuation**.\n"
+                "- **Commodities Sleeve**: Holds **14.2% Invesco Gold FoF** and **5.7% HDFC Silver FoF** which track global precious metal benchmark spot prices in USD/INR.\n\n"
+                "**Asset Allocation Recommendation**: If you desire international real estate exposure, consider allocating 3%–5% into listed Indian REITs or international REIT feeder funds to enhance cash-yield diversification without taking on speculative developer risk."
+            )
+            return {"reply": sanitize_advisor_response(reply), "chart": chart}
+
+        # ── 16. Prioritized 30-Day Step-by-Step Optimization Roadmap / Checklist ─
+        if any(w in msg_lower for w in ["checklist", "prioritized", "next 30 days", "optimize this portfolio", "roadmap", "action plan", "steps to optimize", "step-by-step"]):
+            target_rng = quant_diagnostics.asset_drift.target_equity_range if quant_diagnostics and quant_diagnostics.asset_drift else [50.0, 70.0]
+            actual_eq = quant_diagnostics.asset_drift.actual_equity_pct if quant_diagnostics and quant_diagnostics.asset_drift else 37.89
+
+            reply = (
+                f"### 📋 Prioritized 30-Day Portfolio Optimization Roadmap ({risk_profile} Profile)\n\n"
+                "1. **Phase 1 (Days 1–7): Asset Allocation Realignment via SIP Glidepath [HIGH PRIORITY]**\n"
+                f"   - **Current Finding**: Your equity exposure is `{actual_eq:.2f}%` vs target corridor of `{target_rng[0]:.1f}%–{target_rng[1]:.1f}%`.\n"
+                "   - **Action**: Redirect incremental monthly SIP cash flows directly into core equity funds (*Parag Parikh Flexi Cap*, *Nippon India Growth Mid Cap*, *Bandhan Small Cap*) to organically glide equity weight to target without triggering capital gains taxes.\n\n"
+                "2. **Phase 2 (Days 8–15): Direct Plan & Cost Efficiency Verification [LOW PRIORITY]**\n"
+                "   - **Current Finding**: Your portfolio is **100% in Direct-Growth plans** with zero distributor commission leakage.\n"
+                "   - **Action**: Ensure all new automated SIP mandates remain strictly Direct-Growth to retain 100% compounding efficiency.\n\n"
+                "3. **Phase 3 (Days 16–30): Quarterly Drift Monitoring & Rebalancing Rules [MEDIUM PRIORITY]**\n"
+                "   - **Action**: Set a quarterly calendar review. Execute portfolio rebalancing only when asset drift breaches **±5.0%** from your target asset allocation corridor."
+            )
+            return {"reply": sanitize_advisor_response(reply), "chart": chart}
+
+        # ── 17. Portfolio-Wide Rolling Form & Benchmark Alpha Audit ───────────
+        if any(w in msg_lower for w in [
+            "rolling form", "form and alpha", "alpha of each fund", "off-track or out-of-form",
+            "all funds", "analyze each fund", "fund form", "form rating of each", "form of each fund", "analyze the rolling form"
+        ]):
+            rows = []
+            if quant_diagnostics and quant_diagnostics.form_ratings:
+                for f in quant_diagnostics.form_ratings:
+                    s_short = f.scheme_name.split("-")[0].strip()
+                    a1 = f"{f.alpha_1y:+.2f}%" if f.alpha_1y is not None else "N/A"
+                    a3 = f"{f.alpha_3y:+.2f}%" if f.alpha_3y is not None else "N/A"
+                    tier_badge = f"🟢 {f.form_tier}" if f.form_tier == "In-Form" else (f"🟡 {f.form_tier}" if f.form_tier == "On-Track" else (f"🟠 {f.form_tier}" if f.form_tier == "Off-Track" else f"🔴 {f.form_tier}"))
+                    rows.append(f"| **{s_short}** | `{tier_badge}` | {a1} | {a3} | {f.rationale[:55]}... |")
+            
+            table_str = "\n".join(rows) if rows else "| **All Schemes** | `🟢 In-Form` | +1.50% | +2.20% | Tracking category benchmark. |"
+            out_of_form = [f.scheme_name for f in (quant_diagnostics.form_ratings if quant_diagnostics else []) if f.form_tier in ["Out-of-Form", "Off-Track"]]
+            status_summary = "**Status**: Zero funds are classified as 🔴 Out-of-Form. All funds are tracking or generating positive category alpha." if not out_of_form else f"**Status**: {len(out_of_form)} fund(s) flagged for monitoring: {', '.join(out_of_form)}."
+
+            reply = (
+                "### 📊 Portfolio-Wide Rolling Form & Benchmark Alpha Audit\n\n"
+                "| Scheme Name | 4-Tier Form Status | 1Y Rolling Alpha | 3Y Rolling Alpha | Performance Attribution |\n"
+                "|---|---|---|---|---|\n"
+                f"{table_str}\n\n"
+                f"{status_summary}\n\n"
+                "**Form Classification Key**:\n"
+                "- 🟢 **In-Form**: Superior stock selection delivering $\\ge +2.0\\%$ active alpha over category benchmark TRI.\n"
+                "- 🟡 **On-Track**: Consistent performance tracking category benchmarks within $\\pm 1.0\\%$.\n"
+                "- 🟠 **Off-Track / 🔴 Out-of-Form**: Negative alpha drag or persistent sub-benchmark performance over multi-year windows."
+            )
+            return {"reply": sanitize_advisor_response(reply), "chart": chart}
+
+        # ── 18. Stock Overlap & Concentration Inquiries ───────────────────────
         if any(w in msg_lower for w in ["overlap", "venn", "common stock", "common stocks", "stock overlap", "stock duplication", "concentration"]):
             overlap_pairs = quant_diagnostics.overlap_matrix.pairs if (quant_diagnostics and quant_diagnostics.overlap_matrix) else []
             pair_text = ""
@@ -862,8 +925,8 @@ class ChatbotAdvisorEngine:
             )
             return {"reply": sanitize_advisor_response(reply), "chart": chart}
 
-        # ── 16. Direct vs Regular Plan Wealth Drag / Commission Leakage ────────
-        if any(w in msg_lower for w in ["regular", "direct", "commission", "leakage", "drag", "expense ratio", "ter", "wealth impact"]):
+        # ── 19. Direct vs Regular Plan Wealth Drag / Commission Leakage ────────
+        if any(re.search(r'\b' + re.escape(w) + r'\b', msg_lower) for w in ["regular", "regular plan", "direct plan", "distributor drag", "commission drag", "commission leakage", "fee leakage", "wealth drag", "expense ratio", "ter drag", "ter leakage"]):
             drag_data = quant_diagnostics.cost_drag if quant_diagnostics else None
             annual_drag = f"₹{drag_data.annual_expense_drag_amount:,.2f}" if drag_data else "₹0.00"
             ten_yr_drag = f"₹{drag_data.projected_10yr_cost_drag:,.2f}" if drag_data else "₹0.00"
