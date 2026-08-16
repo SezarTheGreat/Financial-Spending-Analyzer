@@ -30,7 +30,7 @@ class Transaction(BaseModel):
     amount: float
     units: float
     nav: float
-    type: str  # e.g., 'PURCHASE', 'REDEMPTION', 'SIP', 'DIVIDEND'
+    type: str  # e.g., 'PURCHASE', 'REDEMPTION', 'SIP', 'DIVIDEND', 'SWITCH_IN', 'SWITCH_OUT'
 
 
 class Holding(BaseModel):
@@ -39,13 +39,15 @@ class Holding(BaseModel):
     isin: Optional[str] = None
     amfi_code: Optional[str] = None
     plan_type: PlanType = "DIRECT"
-    category: str = "Equity"  # Equity, Debt, Hybrid, Liquid, etc.
+    category: str = "Equity"  # Equity, Debt, Commodities, Hybrid, Liquid, Large Cap, Mid Cap, Small Cap, Flexi Cap, etc.
     units: float = 0.0
     nav: float = 0.0
     current_value: float = 0.0
     cost_value: float = 0.0
     unrealized_gain: float = 0.0
     return_percentage: float = 0.0
+    portfolio_weight_pct: float = 0.0  # Holding allocation % in portfolio
+    xirr: Optional[float] = None
     transactions: List[Transaction] = Field(default_factory=list)
 
 
@@ -65,12 +67,15 @@ class Portfolio(BaseModel):
 class FundRollingCAGR(BaseModel):
     scheme_name: str
     amfi_code: Optional[str] = None
+    category: str = "Equity"
     cagr_1y: Optional[float] = None
     cagr_3y: Optional[float] = None
     category_benchmark_1y: float
     category_benchmark_3y: float
     alpha_1y: Optional[float] = None
     alpha_3y: Optional[float] = None
+    portfolio_weight_pct: Optional[float] = None
+    xirr: Optional[float] = None
 
 
 class FundFormDiagnostic(BaseModel):
@@ -81,6 +86,8 @@ class FundFormDiagnostic(BaseModel):
     cagr_3y: Optional[float] = None
     alpha_1y: Optional[float] = None
     alpha_3y: Optional[float] = None
+    portfolio_weight_pct: Optional[float] = None
+    xirr: Optional[float] = None
     form_tier: FormTier
     rationale: str
 
@@ -97,12 +104,14 @@ class CostDragAnalysis(BaseModel):
 
 
 class AssetAllocation(BaseModel):
-    equity_value: float
-    equity_pct: float
-    debt_value: float
-    debt_pct: float
-    cash_liquid_value: float
-    cash_liquid_pct: float
+    equity_value: float = 0.0
+    equity_pct: float = 0.0
+    debt_value: float = 0.0
+    debt_pct: float = 0.0
+    commodities_value: float = 0.0
+    commodities_pct: float = 0.0
+    cash_liquid_value: float = 0.0
+    cash_liquid_pct: float = 0.0
     other_value: float = 0.0
     other_pct: float = 0.0
 
@@ -117,19 +126,36 @@ class AssetDriftAnalysis(BaseModel):
     recommendation: str
 
 
+class CommonStockHolding(BaseModel):
+    stock_name: str
+    weight_in_a: float
+    weight_in_b: float
+    overlap_contribution: float  # min(weight_a, weight_b)
+
+
 class OverlapPair(BaseModel):
     fund_a: str
     fund_b: str
     overlap_percentage: float
     common_holdings: List[str]
+    common_stocks_breakdown: List[CommonStockHolding] = []
+    diversification_verdict: str = "Good Diversification"
+    overlap_level: str = "Low Overlap"  # "Low Overlap", "Moderate Overlap", "High Overlap"
+
+
+class FundConstituentStock(BaseModel):
+    stock_name: str
+    weight: float
 
 
 class OverlapMatrixAnalysis(BaseModel):
     pairs: List[OverlapPair]
-    high_overlap_pairs: List[OverlapPair]  # Overlap > 30%
+    high_overlap_pairs: List[OverlapPair]  # Overlap >= 30%
+    fund_holdings_map: Dict[str, List[FundConstituentStock]] = {}
 
 
 class QuantDiagnostics(BaseModel):
+    portfolio_xirr: Optional[float] = None
     rolling_cagrs: List[FundRollingCAGR]
     form_ratings: List[FundFormDiagnostic]
     cost_drag: CostDragAnalysis
@@ -169,7 +195,13 @@ class AIAnalysisReport(BaseModel):
     step_by_step_rebalance_checklist: List[StepByStepChecklist] = Field(description="Chronological rebalancing checklist")
 
 
-# --- Top-Level Audit Response Model ---
+# --- Top-Level Audit Response & Request Models ---
+
+class ReEvaluateRiskRequest(BaseModel):
+    audit_id: Optional[str] = None
+    portfolio: Optional[Portfolio] = None
+    risk_profile: RiskProfile = "Moderate"
+
 
 class PortfolioAuditResponse(BaseModel):
     audit_id: str

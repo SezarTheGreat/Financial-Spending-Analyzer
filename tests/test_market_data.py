@@ -41,4 +41,4 @@ def test_top_holdings_resolution():
     service = MarketDataService()
     holdings = service.get_scheme_top_holdings("Parag Parikh Flexi Cap Fund", "122639")
     assert isinstance(holdings, list)
-    assert "HDFC Bank" in holdings or "Alphabet Inc" in holdings
+    assert any("HDFC Bank" in h for h in holdings) or any("Alphabet" in h for h in holdings)

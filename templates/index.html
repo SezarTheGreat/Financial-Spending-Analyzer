@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FinWise — Your Financial Analyser</title>
+<title>FinWise — Mutual Fund Portfolio & Financial Spending Analyzer</title>
+<meta name="description" content="Institutional-grade Mutual Fund Portfolio & Spending Analyzer with deterministic quant engine, Newton-Raphson XIRR, distributor drag calculator, and Google Gemini AI insights.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --cream:     #F5F0E8;
@@ -19,6 +20,9 @@
     --ink2:      #2D2D44;
     --muted:     #7A7A9A;
     --white:     #FEFEFE;
+    --border:    rgba(26,26,46,0.08);
+    --shadow-sm: 0 4px 16px rgba(26,26,46,0.06);
+    --shadow-md: 0 12px 40px rgba(26,26,46,0.1);
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -34,23 +38,26 @@
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 48px;
-    background: rgba(245,240,232,0.85);
-    backdrop-filter: blur(12px);
+    padding: 16px 48px;
+    background: rgba(245,240,232,0.9);
+    backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(26,26,46,0.06);
   }
-  .logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--ink); letter-spacing: -0.5px; }
+  .logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--ink); letter-spacing: -0.5px; font-weight: 700; }
   .logo span { color: var(--blush); }
-  .nav-links { display: flex; gap: 32px; }
-  .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.875rem; font-weight: 500;
-    transition: color 0.2s; }
+  .nav-links { display: flex; align-items: center; gap: 24px; }
+  .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
   .nav-links a:hover { color: var(--ink); }
+  .nav-pill-badge {
+    background: var(--ink); color: var(--butter); font-size: 0.72rem; font-weight: 600;
+    padding: 5px 12px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;
+  }
 
   /* ── Hero ── */
   .hero {
-    min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 120px 32px 60px;
+    min-height: calc(100vh - 65px);
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    padding: 85px 24px 40px;
     position: relative; overflow: hidden;
   }
 
@@ -59,106 +66,165 @@
     position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none;
     animation: drift 8s ease-in-out infinite alternate;
   }
-  .blob-1 { width: 400px; height: 400px; background: var(--blush); top: -80px; left: -100px; animation-delay: 0s; }
-  .blob-2 { width: 350px; height: 350px; background: var(--butter); top: 20%; right: -80px; animation-delay: 2s; }
-  .blob-3 { width: 300px; height: 300px; background: var(--lavender); bottom: 10%; left: 15%; animation-delay: 4s; }
-  .blob-4 { width: 250px; height: 250px; background: var(--sage); bottom: 20%; right: 10%; animation-delay: 1s; }
+  .blob-1 { width: 420px; height: 420px; background: var(--blush); top: -80px; left: -100px; animation-delay: 0s; }
+  .blob-2 { width: 380px; height: 380px; background: var(--butter); top: 15%; right: -80px; animation-delay: 2s; }
+  .blob-3 { width: 320px; height: 320px; background: var(--lavender); bottom: 10%; left: 10%; animation-delay: 4s; }
+  .blob-4 { width: 280px; height: 280px; background: var(--sage); bottom: 15%; right: 10%; animation-delay: 1s; }
   @keyframes drift { from { transform: translateY(0) scale(1); } to { transform: translateY(-30px) scale(1.05); } }
 
-  /* artwork SVG area */
-  .artwork-wrapper {
-    position: relative; z-index: 1; margin-bottom: 48px;
-    animation: float 4s ease-in-out infinite;
-  }
-  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-
-  .hero-text { text-align: center; position: relative; z-index: 1; max-width: 640px; }
+  .hero-text { text-align: center; position: relative; z-index: 1; max-width: 720px; margin-bottom: 18px; }
   .eyebrow {
-    display: inline-block; background: var(--ink); color: var(--butter);
-    font-size: 0.7rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
-    padding: 4px 14px; border-radius: 20px; margin-bottom: 20px;
+    display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--butter);
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 20px; margin-bottom: 12px;
   }
   h1 {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 5vw, 3.8rem);
-    line-height: 1.15; letter-spacing: -1px;
-    margin-bottom: 18px;
+    font-size: clamp(2rem, 3.6vw, 3rem);
+    line-height: 1.15; letter-spacing: -0.8px;
+    margin-bottom: 10px;
   }
   h1 em { font-style: italic; color: var(--blush); }
   .subtitle {
-    font-size: 1rem; color: var(--muted); line-height: 1.7; margin-bottom: 40px;
-    font-weight: 400;
+    font-size: 0.94rem; color: var(--muted); line-height: 1.55; max-width: 600px; margin: 0 auto;
   }
 
-  /* ── Upload Area ── */
-  .upload-section { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-  .upload-zone {
-    width: 420px; max-width: 90vw;
-    background: var(--white);
-    border: 2px dashed rgba(26,26,46,0.15);
-    border-radius: 24px;
-    padding: 40px 32px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
+  /* ── Mode Switcher Tab ── */
+  .mode-switch-wrap {
+    position: relative; z-index: 1; display: flex; justify-content: center; margin-bottom: 18px;
   }
-  .upload-zone:hover, .upload-zone.drag-over {
-    border-color: var(--blush);
-    background: rgba(244,167,185,0.05);
-    transform: translateY(-2px);
-    box-shadow: 0 16px 48px rgba(244,167,185,0.2);
+  .mode-switcher {
+    display: inline-flex; background: rgba(26,26,46,0.06); padding: 4px; border-radius: 14px; gap: 4px;
   }
-  .upload-icon {
-    width: 64px; height: 64px; margin: 0 auto 16px;
+  .mode-btn {
+    border: none; background: transparent; padding: 8px 18px; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 600; color: var(--muted);
+    cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
+  }
+  .mode-btn.active {
+    background: var(--white); color: var(--ink); box-shadow: var(--shadow-sm);
+  }
+
+  /* ── Card Container ── */
+  .analyzer-card-container {
+    position: relative; z-index: 1; width: 540px; max-width: 92vw;
+  }
+  .analyzer-panel {
+    background: var(--white); border-radius: 22px; padding: 26px 24px;
+    box-shadow: var(--shadow-md); border: 1px solid rgba(26,26,46,0.06);
+    display: none; flex-direction: column; gap: 16px;
+  }
+  .analyzer-panel.active { display: flex; }
+
+  /* ── Dropzone ── */
+  .dropzone {
+    border: 2px dashed rgba(26,26,46,0.15); border-radius: 18px; padding: 22px 16px;
+    text-align: center; cursor: pointer; transition: all 0.2s ease;
+    background: rgba(245,240,232,0.3);
+  }
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--blush); background: rgba(244,167,185,0.07); transform: translateY(-1px);
+  }
+  .drop-icon {
+    width: 46px; height: 46px; margin: 0 auto 10px;
     background: linear-gradient(135deg, var(--blush), var(--lavender));
-    border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem;
-    box-shadow: 0 8px 24px rgba(244,167,185,0.4);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; box-shadow: 0 4px 14px rgba(244,167,185,0.3);
   }
-  .upload-title { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
-  .upload-sub { font-size: 0.8rem; color: var(--muted); }
-  #file-input { display: none; }
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--ink); color: var(--white);
-    border: none; border-radius: 14px; padding: 14px 28px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
-    cursor: pointer; transition: all 0.2s ease; text-decoration: none;
-    box-shadow: 0 4px 16px rgba(26,26,46,0.2);
+  .drop-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 3px; color: var(--ink); }
+  .drop-sub { font-size: 0.78rem; color: var(--muted); }
+  .file-selected-badge {
+    display: inline-flex; align-items: center; gap: 6px; background: rgba(184,212,168,0.3);
+    color: #2b5e1c; font-size: 0.78rem; font-weight: 600; padding: 5px 12px; border-radius: 20px;
+    margin-top: 8px;
   }
-  .btn-primary:hover { background: var(--ink2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,26,46,0.3); }
-  .btn-demo {
-    background: transparent; border: 1.5px solid rgba(26,26,46,0.15);
-    color: var(--muted); border-radius: 14px; padding: 13px 28px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .btn-demo:hover { border-color: var(--blush); color: var(--ink); }
-  .upload-actions { display: flex; gap: 12px; }
 
-  /* progress */
-  .upload-progress {
-    width: 420px; max-width: 90vw;
-    background: var(--white); border-radius: 16px; padding: 20px 24px;
-    display: none;
+  /* ── Form Inputs ── */
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 0.8rem; font-weight: 600; color: var(--ink); display: flex; align-items: center; justify-content: space-between; }
+  .form-label-hint { font-size: 0.72rem; color: var(--muted); font-weight: normal; }
+  
+  .input-password-wrapper { position: relative; display: flex; align-items: center; }
+  .input-text {
+    width: 100%; padding: 12px 42px 12px 14px; border-radius: 12px;
+    border: 1.5px solid rgba(26,26,46,0.12); font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; color: var(--ink); background: var(--cream);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .progress-label { font-size: 0.85rem; font-weight: 500; margin-bottom: 10px; }
-  .progress-bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blush), var(--lavender));
-    border-radius: 3px; transition: width 0.4s ease; width: 0%; }
+  .input-text:focus { outline: none; border-color: var(--ink); background: var(--white); box-shadow: 0 0 0 3px rgba(26,26,46,0.06); }
+  .input-toggle-pwd {
+    position: absolute; right: 12px; background: transparent; border: none;
+    cursor: pointer; font-size: 1.1rem; color: var(--muted); display: flex; align-items: center;
+    padding: 4px; transition: color 0.2s;
+  }
+  .input-toggle-pwd:hover { color: var(--ink); }
+  .input-hint { font-size: 0.74rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── Risk Appetite Selector ── */
+  .risk-selector {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  .risk-option {
+    position: relative; border: 1.5px solid rgba(26,26,46,0.1); border-radius: 12px;
+    padding: 10px 8px; text-align: center; cursor: pointer; transition: all 0.2s ease;
+    background: var(--cream);
+  }
+  .risk-option:hover { border-color: var(--blush); background: var(--white); }
+  .risk-option input[type="radio"] { position: absolute; opacity: 0; }
+  .risk-option.selected {
+    border-color: var(--ink); background: var(--white); box-shadow: 0 4px 12px rgba(26,26,46,0.08);
+  }
+  .risk-title { font-size: 0.82rem; font-weight: 600; color: var(--ink); }
+  .risk-desc { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--ink); color: var(--white); border: none; border-radius: 14px;
+    padding: 14px 24px; font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s ease; width: 100%; box-shadow: 0 6px 18px rgba(26,26,46,0.15);
+  }
+  .btn-primary:hover { background: var(--ink2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,26,46,0.22); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .btn-demo-row { display: flex; justify-content: center; }
+  .btn-demo-link {
+    background: transparent; border: none; color: var(--muted); font-size: 0.84rem;
+    font-weight: 500; cursor: pointer; text-decoration: underline; transition: color 0.2s;
+  }
+  .btn-demo-link:hover { color: var(--ink); }
+
+  /* ── Multi-Stage Progressive Loader ── */
+  .progressive-loader {
+    background: var(--cream); border-radius: 16px; padding: 18px 20px;
+    display: none; flex-direction: column; gap: 12px; margin-top: 4px;
+  }
+  .loader-header { font-size: 0.82rem; font-weight: 600; color: var(--ink); display: flex; align-items: center; justify-content: space-between; }
+  .stage-list { display: flex; flex-direction: column; gap: 8px; }
+  .stage-item {
+    display: flex; align-items: center; gap: 10px; font-size: 0.78rem; color: var(--muted);
+    transition: all 0.3s ease;
+  }
+  .stage-item.active { color: var(--ink); font-weight: 600; }
+  .stage-item.done { color: #2e7d32; }
+  .stage-icon {
+    width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; background: rgba(26,26,46,0.08);
+  }
+  .stage-item.active .stage-icon { background: var(--blush); color: var(--ink); animation: pulse 1s infinite alternate; }
+  .stage-item.done .stage-icon { background: var(--sage); color: #1b5e20; }
+  @keyframes pulse { from { transform: scale(0.9); } to { transform: scale(1.1); } }
 
   /* ── Features Strip ── */
   .features {
-    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
-    margin-top: 64px; padding: 0 32px; position: relative; z-index: 1;
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    margin-top: 48px; padding: 0 24px; position: relative; z-index: 1;
   }
   .feature-pill {
-    background: var(--white); border-radius: 40px; padding: 10px 20px;
+    background: var(--white); border-radius: 40px; padding: 8px 18px;
     display: flex; align-items: center; gap: 8px;
-    font-size: 0.8rem; font-weight: 500; color: var(--ink);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    font-size: 0.78rem; font-weight: 600; color: var(--ink);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(26,26,46,0.04);
   }
   .feature-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
 
@@ -168,6 +234,7 @@
     background: var(--ink); color: var(--white); border-radius: 12px;
     padding: 12px 24px; font-size: 0.85rem; font-weight: 500;
     opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   }
   .toast.show { opacity: 1; }
 </style>
@@ -177,8 +244,9 @@
 <nav>
   <div class="logo">Fin<span>Wise</span></div>
   <div class="nav-links">
+    <span class="nav-pill-badge">✦ Hybrid Quant & AI</span>
     <a href="#features">Features</a>
-    <a href="https://github.com" target="_blank">GitHub</a>
+    <a href="/dashboard">Direct Dashboard</a>
   </div>
 </nav>
 
@@ -189,136 +257,350 @@
   <div class="blob blob-3"></div>
   <div class="blob blob-4"></div>
 
-  <!-- SVG Artwork -->
-  <div class="artwork-wrapper">
-    <svg width="220" height="180" viewBox="0 0 220 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- coin stack base -->
-      <ellipse cx="110" cy="155" rx="55" ry="14" fill="#F4A7B9" opacity="0.6"/>
-      <ellipse cx="110" cy="143" rx="55" ry="14" fill="#F4A7B9"/>
-      <rect x="55" y="100" width="110" height="43" rx="2" fill="#F4A7B9"/>
-      <ellipse cx="110" cy="100" rx="55" ry="14" fill="#F9C8D4"/>
-      <!-- coin 2 -->
-      <ellipse cx="110" cy="118" rx="44" ry="11" fill="#C9B8E8" opacity="0.6"/>
-      <ellipse cx="110" cy="107" rx="44" ry="11" fill="#C9B8E8"/>
-      <rect x="66" y="72" width="88" height="35" rx="2" fill="#C9B8E8"/>
-      <ellipse cx="110" cy="72" rx="44" ry="11" fill="#DDD0F5"/>
-      <!-- coin 3 -->
-      <ellipse cx="110" cy="88" rx="34" ry="9" fill="#F5E642" opacity="0.6"/>
-      <ellipse cx="110" cy="79" rx="34" ry="9" fill="#F5E642"/>
-      <rect x="76" y="52" width="68" height="27" rx="2" fill="#F5E642"/>
-      <ellipse cx="110" cy="52" rx="34" ry="9" fill="#FBF17A"/>
-      <!-- sparkle stars -->
-      <text x="168" y="55" font-size="18" fill="#B8D4A8" opacity="0.9">✦</text>
-      <text x="30" y="80" font-size="14" fill="#F4A7B9" opacity="0.8">✦</text>
-      <text x="185" y="110" font-size="10" fill="#C9B8E8">✦</text>
-      <text x="20" y="130" font-size="10" fill="#F5E642">✦</text>
-      <!-- mini chart line on top coin -->
-      <polyline points="85,47 92,38 100,43 110,30 120,36 128,28 140,34" stroke="#1A1A2E" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="140" cy="34" r="4" fill="#1A1A2E"/>
-    </svg>
-  </div>
-
   <div class="hero-text">
-    <span class="eyebrow">Financial Analyser</span>
-    <h1>Know where every<br><em>rupee</em> goes.</h1>
-    <p class="subtitle">Upload your bank CSV and get instant AI-powered insights — spending patterns, anomalies, savings score, and personalised recommendations.</p>
+    <span class="eyebrow">✦ FinWise Intelligence Platform</span>
+    <h1>Institutional-Grade Portfolio &amp;<br><em>Spending</em> Intelligence.</h1>
+    <p class="subtitle">Upload your CAMS/KFintech CAS statement or Bank CSV for deterministic quant diagnostics, Newton-Raphson XIRR, distributor drag leakage, and Google Gemini AI insights.</p>
   </div>
 
-  <div class="upload-section">
-    <div class="upload-zone" id="upload-zone">
-      <div class="upload-icon">📊</div>
-      <div class="upload-title">Drop your bank CSV here</div>
-      <div class="upload-sub">or click to browse — we never store your data</div>
-      <input type="file" id="file-input" accept=".csv">
-    </div>
-
-    <div class="upload-progress" id="upload-progress">
-      <div class="progress-label" id="progress-label">Parsing transactions…</div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-    </div>
-
-    <div class="upload-actions">
-      <button class="btn-primary" onclick="document.getElementById('file-input').click()">
-        <span>📂</span> Choose CSV
+  <!-- Mode Switcher -->
+  <div class="mode-switch-wrap">
+    <div class="mode-switcher">
+      <button class="mode-btn active" id="btn-mode-mf" onclick="switchMode('mf')">
+        <span>📈</span> Mutual Fund Portfolio (CAS PDF)
       </button>
-      <button class="btn-demo" onclick="loadDemo()">Try with sample data →</button>
+      <button class="mode-btn" id="btn-mode-spending" onclick="switchMode('spending')">
+        <span>💳</span> Bank Spending (CSV)
+      </button>
     </div>
+  </div>
+
+  <div class="analyzer-card-container">
+
+    <!-- ═══ 1. MUTUAL FUND CAS ANALYZER PANEL ═══ -->
+    <div class="analyzer-panel active" id="panel-mf">
+      <div class="dropzone" id="mf-dropzone" onclick="document.getElementById('mf-file-input').click()">
+        <div class="drop-icon">📄</div>
+        <div class="drop-title">Drop your CAMS / KFintech eCAS PDF here</div>
+        <div class="drop-sub">Detailed statement encrypted with your custom CAMS password or PAN</div>
+        <div id="mf-file-badge" class="file-selected-badge" style="display:none;"></div>
+        <input type="file" id="mf-file-input" accept=".pdf" style="display:none;" onchange="handleMfFileSelect(event)">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="mf-password">
+          <span>Statement Password</span>
+          <span class="form-label-hint">Encrypted In-Memory Only</span>
+        </label>
+        <div class="input-password-wrapper">
+          <input type="password" id="mf-password" class="input-text" placeholder="Enter custom CAMS password or UPPERCASE PAN">
+          <button type="button" class="input-toggle-pwd" onclick="togglePasswordVisibility('mf-password', this)" title="Show/Hide Password">👁</button>
+        </div>
+        <p class="input-hint">Enter your custom CAMS password or PAN in uppercase. Statements are parsed 100% in-memory and never saved to disk.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Investor Risk Appetite</label>
+        <div class="risk-selector">
+          <label class="risk-option" id="risk-opt-conservative" onclick="selectRisk('Conservative')">
+            <input type="radio" name="risk_profile" value="Conservative">
+            <div class="risk-title">Conservative</div>
+            <div class="risk-desc">20–40% Equity</div>
+          </label>
+          <label class="risk-option selected" id="risk-opt-moderate" onclick="selectRisk('Moderate')">
+            <input type="radio" name="risk_profile" value="Moderate" checked>
+            <div class="risk-title">Moderate</div>
+            <div class="risk-desc">50–70% Equity</div>
+          </label>
+          <label class="risk-option" id="risk-opt-aggressive" onclick="selectRisk('Aggressive')">
+            <input type="radio" name="risk_profile" value="Aggressive">
+            <div class="risk-title">Aggressive</div>
+            <div class="risk-desc">75–95% Equity</div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Progressive Multi-Stage Loading State -->
+      <div class="progressive-loader" id="mf-loader">
+        <div class="loader-header">
+          <span id="loader-title">Executing Hybrid Audit Pipeline...</span>
+          <span id="loader-timer" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">⏳</span>
+        </div>
+        <div class="stage-list">
+          <div class="stage-item" id="stage-1"><div class="stage-icon">1</div> Decrypting Statement in Memory</div>
+          <div class="stage-item" id="stage-2"><div class="stage-icon">2</div> Fetching Daily NAVs &amp; AMFI Benchmarks</div>
+          <div class="stage-item" id="stage-3"><div class="stage-icon">3</div> Computing Quant Diagnostics (XIRR, Drag, Drift, Overlap)</div>
+          <div class="stage-item" id="stage-4"><div class="stage-icon">4</div> Synthesizing Structured AI Advisory (Gemini)</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btn-analyze-mf" onclick="submitMfAnalysis()">
+        <span>🚀</span> Analyze CAS Statement
+      </button>
+
+      <div class="btn-demo-row">
+        <button class="btn-demo-link" onclick="loadMfDemo()">⚡ Explore with Demo Portfolio (Instant Evaluation) →</button>
+      </div>
+    </div>
+
+    <!-- ═══ 2. BANK SPENDING CSV ANALYZER PANEL ═══ -->
+    <div class="analyzer-panel" id="panel-spending">
+      <div class="dropzone" id="csv-dropzone" onclick="document.getElementById('csv-file-input').click()">
+        <div class="drop-icon">📊</div>
+        <div class="drop-title">Drop your Bank Statement CSV here</div>
+        <div class="drop-sub">Export from HDFC, ICICI, SBI, Axis, Kotak or standard CSV</div>
+        <div id="csv-file-badge" class="file-selected-badge" style="display:none;"></div>
+        <input type="file" id="csv-file-input" accept=".csv" style="display:none;" onchange="handleCsvFileSelect(event)">
+      </div>
+
+      <div class="progressive-loader" id="csv-loader">
+        <div class="loader-header"><span>Processing bank transactions...</span></div>
+        <div class="stage-list">
+          <div class="stage-item active"><div class="stage-icon">✓</div> Preprocessing dates, amounts &amp; categories</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btn-analyze-csv" onclick="submitCsvAnalysis()">
+        <span>📂</span> Analyze Spending CSV
+      </button>
+
+      <div class="btn-demo-row">
+        <button class="btn-demo-link" onclick="loadSpendingDemo()">⚡ Try with sample spending data →</button>
+      </div>
+    </div>
+
   </div>
 
   <div class="features" id="features">
-    <div class="feature-pill"><div class="dot" style="background:var(--blush)"></div>Category Mapping</div>
-    <div class="feature-pill"><div class="dot" style="background:var(--butter)"></div>Expense Trends</div>
-    <div class="feature-pill"><div class="dot" style="background:var(--sage)"></div>Savings Score</div>
-    <div class="feature-pill"><div class="dot" style="background:var(--lavender)"></div>Anomaly Detection</div>
-    <div class="feature-pill"><div class="dot" style="background:var(--peach)"></div>AI Insights</div>
-    <div class="feature-pill"><div class="dot" style="background:var(--teal)"></div>Calendar Heatmap</div>
+    <div class="feature-pill"><div class="dot" style="background:var(--sage)"></div>Newton-Raphson XIRR</div>
+    <div class="feature-pill"><div class="dot" style="background:var(--blush)"></div>Distributor Drag Calculator</div>
+    <div class="feature-pill"><div class="dot" style="background:var(--butter)"></div>4-Tier Form Classifier</div>
+    <div class="feature-pill"><div class="dot" style="background:var(--lavender)"></div>Asset Drift vs Risk Target</div>
+    <div class="feature-pill"><div class="dot" style="background:var(--peach)"></div>Pairwise Overlap Matrix</div>
+    <div class="feature-pill"><div class="dot" style="background:var(--teal)"></div>Google GenAI Advisory</div>
   </div>
 </section>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const zone = document.getElementById('upload-zone');
-const fileInput = document.getElementById('file-input');
-const progressEl = document.getElementById('upload-progress');
-const fillEl = document.getElementById('progress-fill');
-const labelEl = document.getElementById('progress-label');
+let selectedMfFile = null;
+let selectedCsvFile = null;
+let currentRiskProfile = 'Moderate';
 
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-zone.addEventListener('drop', e => {
-  e.preventDefault(); zone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file) uploadFile(file);
+function switchMode(mode) {
+  document.getElementById('btn-mode-mf').classList.toggle('active', mode === 'mf');
+  document.getElementById('btn-mode-spending').classList.toggle('active', mode === 'spending');
+  document.getElementById('panel-mf').classList.toggle('active', mode === 'mf');
+  document.getElementById('panel-spending').classList.toggle('active', mode === 'spending');
+}
+
+function togglePasswordVisibility(inputId, btn) {
+  const el = document.getElementById(inputId);
+  if (el.type === 'password') {
+    el.type = 'text';
+    btn.textContent = '🔒';
+  } else {
+    el.type = 'password';
+    btn.textContent = '👁';
+  }
+}
+
+function selectRisk(risk) {
+  currentRiskProfile = risk;
+  ['conservative', 'moderate', 'aggressive'].forEach(r => {
+    const el = document.getElementById('risk-opt-' + r);
+    if (el) el.classList.toggle('selected', r === risk.toLowerCase());
+  });
+}
+
+function handleMfFileSelect(e) {
+  if (e.target.files && e.target.files[0]) {
+    selectedMfFile = e.target.files[0];
+    const badge = document.getElementById('mf-file-badge');
+    badge.textContent = `✓ ${selectedMfFile.name} (${(selectedMfFile.size / 1024).toFixed(1)} KB)`;
+    badge.style.display = 'inline-flex';
+  }
+}
+
+function handleCsvFileSelect(e) {
+  if (e.target.files && e.target.files[0]) {
+    selectedCsvFile = e.target.files[0];
+    const badge = document.getElementById('csv-file-badge');
+    badge.textContent = `✓ ${selectedCsvFile.name} (${(selectedCsvFile.size / 1024).toFixed(1)} KB)`;
+    badge.style.display = 'inline-flex';
+  }
+}
+
+// Drag & drop support
+const mfZone = document.getElementById('mf-dropzone');
+mfZone.addEventListener('dragover', e => { e.preventDefault(); mfZone.classList.add('drag-over'); });
+mfZone.addEventListener('dragleave', () => mfZone.classList.remove('drag-over'));
+mfZone.addEventListener('drop', e => {
+  e.preventDefault(); mfZone.classList.remove('drag-over');
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    selectedMfFile = e.dataTransfer.files[0];
+    const badge = document.getElementById('mf-file-badge');
+    badge.textContent = `✓ ${selectedMfFile.name}`;
+    badge.style.display = 'inline-flex';
+  }
 });
-zone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => { if (e.target.files[0]) uploadFile(e.target.files[0]); });
 
-function showProgress(label) {
-  progressEl.style.display = 'block';
-  labelEl.textContent = label;
-  let w = 0;
-  return setInterval(() => {
-    w = Math.min(w + Math.random() * 15, 85);
-    fillEl.style.width = w + '%';
-  }, 200);
+const csvZone = document.getElementById('csv-dropzone');
+csvZone.addEventListener('dragover', e => { e.preventDefault(); csvZone.classList.add('drag-over'); });
+csvZone.addEventListener('dragleave', () => csvZone.classList.remove('drag-over'));
+csvZone.addEventListener('drop', e => {
+  e.preventDefault(); csvZone.classList.remove('drag-over');
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    selectedCsvFile = e.dataTransfer.files[0];
+    const badge = document.getElementById('csv-file-badge');
+    badge.textContent = `✓ ${selectedCsvFile.name}`;
+    badge.style.display = 'inline-flex';
+  }
+});
+
+function advanceStages() {
+  const s1 = document.getElementById('stage-1');
+  const s2 = document.getElementById('stage-2');
+  const s3 = document.getElementById('stage-3');
+  const s4 = document.getElementById('stage-4');
+
+  s1.className = 'stage-item active';
+  s2.className = 'stage-item';
+  s3.className = 'stage-item';
+  s4.className = 'stage-item';
+
+  setTimeout(() => { s1.className = 'stage-item done'; s2.className = 'stage-item active'; }, 600);
+  setTimeout(() => { s2.className = 'stage-item done'; s3.className = 'stage-item active'; }, 1300);
+  setTimeout(() => { s3.className = 'stage-item done'; s4.className = 'stage-item active'; }, 2100);
 }
 
-function uploadFile(file) {
+async function submitMfAnalysis() {
+  if (!selectedMfFile) {
+    showToast('⚠️ Please choose a CAMS/KFintech CAS PDF statement.');
+    return;
+  }
+  const pwd = document.getElementById('mf-password').value.trim();
+  if (!pwd) {
+    showToast('⚠️ Please enter the statement password or PAN.');
+    return;
+  }
+
+  const loader = document.getElementById('mf-loader');
+  const btn = document.getElementById('btn-analyze-mf');
+  loader.style.display = 'flex';
+  btn.disabled = true;
+  advanceStages();
+
   const fd = new FormData();
-  fd.append('file', file);
-  const timer = showProgress('Parsing your transactions…');
-  fetch('/api/upload', { method: 'POST', body: fd })
-    .then(r => r.json())
-    .then(data => {
-      clearInterval(timer);
-      if (data.success) {
-        fillEl.style.width = '100%';
-        labelEl.textContent = `✓ ${data.summary.total_transactions} transactions loaded`;
-        setTimeout(() => window.location.href = '/dashboard', 800);
-      } else {
-        showToast('⚠️ ' + data.error);
-        progressEl.style.display = 'none';
-      }
-    })
-    .catch(() => { clearInterval(timer); showToast('Upload failed. Check your CSV format.'); progressEl.style.display = 'none'; });
+  fd.append('file', selectedMfFile);
+  fd.append('password', pwd);
+  fd.append('risk_profile', currentRiskProfile);
+
+  try {
+    const res = await fetch('/api/portfolio/analyze-cas', {
+      method: 'POST',
+      body: fd,
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('stage-4').className = 'stage-item done';
+      sessionStorage.setItem('finwise_portfolio_audit', JSON.stringify(data));
+      showToast('✓ Audit synthesized successfully!');
+      setTimeout(() => window.location.href = '/dashboard', 600);
+    } else {
+      loader.style.display = 'none';
+      btn.disabled = false;
+      showToast('⚠️ ' + (data.detail || data.error || 'Failed to process statement.'));
+    }
+  } catch (err) {
+    loader.style.display = 'none';
+    btn.disabled = false;
+    showToast('⚠️ Connection error. Check server status.');
+  }
 }
 
-function loadDemo() {
-  const timer = showProgress('Loading sample data…');
-  fetch('/api/sample')
-    .then(r => r.json())
-    .then(data => {
-      clearInterval(timer);
-      fillEl.style.width = '100%';
-      labelEl.textContent = '✓ Sample data ready';
-      setTimeout(() => window.location.href = '/dashboard', 600);
+async function loadMfDemo() {
+  const loader = document.getElementById('mf-loader');
+  const btn = document.getElementById('btn-analyze-mf');
+  loader.style.display = 'flex';
+  btn.disabled = true;
+  advanceStages();
+
+  const fd = new FormData();
+  fd.append('risk_profile', currentRiskProfile);
+
+  try {
+    const res = await fetch('/api/portfolio/analyze-demo', {
+      method: 'POST',
+      body: fd,
     });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('stage-4').className = 'stage-item done';
+      sessionStorage.setItem('finwise_portfolio_audit', JSON.stringify(data));
+      showToast('✓ Demo audit loaded!');
+      setTimeout(() => window.location.href = '/dashboard', 600);
+    } else {
+      loader.style.display = 'none';
+      btn.disabled = false;
+      showToast('⚠️ ' + (data.detail || 'Demo analysis failed.'));
+    }
+  } catch (err) {
+    loader.style.display = 'none';
+    btn.disabled = false;
+    showToast('⚠️ Connection error.');
+  }
+}
+
+async function submitCsvAnalysis() {
+  if (!selectedCsvFile) {
+    showToast('⚠️ Please select a CSV file.');
+    return;
+  }
+  const fd = new FormData();
+  fd.append('file', selectedCsvFile);
+  document.getElementById('csv-loader').style.display = 'flex';
+  document.getElementById('btn-analyze-csv').disabled = true;
+
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('✓ Transactions loaded!');
+      setTimeout(() => window.location.href = '/dashboard', 600);
+    } else {
+      document.getElementById('csv-loader').style.display = 'none';
+      document.getElementById('btn-analyze-csv').disabled = false;
+      showToast('⚠️ ' + (data.error || 'CSV upload failed.'));
+    }
+  } catch (err) {
+    document.getElementById('csv-loader').style.display = 'none';
+    document.getElementById('btn-analyze-csv').disabled = false;
+    showToast('⚠️ Error uploading CSV.');
+  }
+}
+
+async function loadSpendingDemo() {
+  document.getElementById('csv-loader').style.display = 'flex';
+  try {
+    const res = await fetch('/api/sample');
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('✓ Sample spending data loaded!');
+      setTimeout(() => window.location.href = '/dashboard', 500);
+    } else {
+      showToast('⚠️ Failed to load sample.');
+    }
+  } catch (err) {
+    showToast('⚠️ Connection error.');
+  }
 }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
+  t.textContent = msg;
+  t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
 </script>

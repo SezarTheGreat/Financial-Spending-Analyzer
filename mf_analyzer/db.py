@@ -21,6 +21,7 @@ class SupabasePortfolioDB:
         self.client: Optional[Client] = None
         self._memory_holdings: Dict[str, List[Dict[str, Any]]] = {}
         self._memory_audits: Dict[str, Dict[str, Any]] = {}
+        self._memory_portfolios: Dict[str, Portfolio] = {}
 
         if self.url and self.key:
             try:
@@ -31,6 +32,18 @@ class SupabasePortfolioDB:
                 self.client = None
         else:
             logger.info("Supabase credentials not provided. Using in-memory persistence.")
+
+    def save_portfolio(self, audit_id: str, portfolio: Portfolio):
+        """
+        Caches portfolio model for fast re-evaluation.
+        """
+        self._memory_portfolios[audit_id] = portfolio
+
+    def get_portfolio(self, audit_id: str) -> Optional[Portfolio]:
+        """
+        Retrieves cached portfolio model by audit_id.
+        """
+        return self._memory_portfolios.get(audit_id)
 
     def save_holdings(self, portfolio_id: str, holdings: List[Holding]) -> bool:
         """

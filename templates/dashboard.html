@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FinWise — Dashboard</title>
+<title>FinWise — Institutional Portfolio & Spending Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
 <body>
@@ -19,47 +20,50 @@
   </div>
 
   <nav class="sidebar-nav">
-    <div class="nav-section-label">General</div>
-    <a href="#" class="nav-item active" data-section="overview">
-      <span class="nav-icon">◈</span> Overview
+    <div class="nav-section-label">Mutual Fund Intelligence</div>
+    <a href="#" class="nav-item active" data-section="mf-overview">
+      <span class="nav-icon">◈</span> MF Overview
     </a>
-    <a href="#" class="nav-item" data-section="categories">
-      <span class="nav-icon">◉</span> Categories
+    <a href="#" class="nav-item" data-section="mf-holdings">
+      <span class="nav-icon">📊</span> Holdings &amp; Form
     </a>
-    <a href="#" class="nav-item" data-section="trends">
-      <span class="nav-icon">↗</span> Trends
+    <a href="#" class="nav-item" data-section="mf-overlap">
+      <span class="nav-icon">⚯</span> Stock Overlap
     </a>
-    <a href="#" class="nav-item" data-section="anomalies">
+    <a href="#" class="nav-item" data-section="mf-advisory">
+      <span class="nav-icon">✦</span> AI Advisory &amp; Actions
+    </a>
+
+    <div class="nav-section-label" style="margin-top:20px">Spending Analytics</div>
+    <a href="#" class="nav-item" data-section="spending-overview">
+      <span class="nav-icon">💳</span> Spending Overview
+    </a>
+    <a href="#" class="nav-item" data-section="spending-categories">
+      <span class="nav-icon">◉</span> Expense Categories
+    </a>
+    <a href="#" class="nav-item" data-section="spending-trends">
+      <span class="nav-icon">↗</span> Trends &amp; Heatmap
+    </a>
+    <a href="#" class="nav-item" data-section="spending-anomalies">
       <span class="nav-icon">⚡</span> Anomalies
     </a>
 
-    <div class="nav-section-label" style="margin-top:24px">AI Tools</div>
-    <a href="#" class="nav-item" data-section="insights">
-      <span class="nav-icon">✦</span> AI Insights
-    </a>
-    <a href="#" class="nav-item" data-section="recommendations">
-      <span class="nav-icon">🎯</span> Recommendations
-    </a>
-
-    <div class="nav-section-label" style="margin-top:24px">Data</div>
-    <a href="#" class="nav-item" data-section="transactions">
-      <span class="nav-icon">≡</span> Transactions
-    </a>
+    <div class="nav-section-label" style="margin-top:20px">Navigation</div>
     <a href="/" class="nav-item">
-      <span class="nav-icon">↩</span> Upload New
+      <span class="nav-icon">↩</span> Upload New Statement
     </a>
   </nav>
 
-  <!-- Health Score mini card in sidebar -->
-  <div class="sidebar-health">
-    <div class="health-label">Financial Health</div>
+  <!-- Health Score Mini Widget in Sidebar -->
+  <div class="sidebar-health" id="sidebarHealthContainer">
+    <div class="health-label">Portfolio Health</div>
     <div class="health-ring-wrap">
-      <canvas id="healthRingSmall" width="80" height="80"></canvas>
+      <canvas id="healthRingSidebar" width="80" height="80"></canvas>
       <div class="health-center-text">
-        <span class="health-grade" id="sidebarGrade">–</span>
+        <span class="health-grade" id="sidebarHealthScore">–</span>
       </div>
     </div>
-    <div class="health-score-val" id="sidebarScore">–</div>
+    <div class="health-score-val" id="sidebarHealthStatus">Evaluating…</div>
   </div>
 </aside>
 
@@ -69,19 +73,401 @@
   <!-- Top bar -->
   <header class="topbar">
     <div class="topbar-left">
-      <h2 class="page-title" id="pageTitle">Good morning ✦</h2>
-      <p class="page-sub" id="pageSub">Loading your financial data…</p>
+      <h2 class="page-title" id="pageTitle">Portfolio Intelligence ✦</h2>
+      <p class="page-sub" id="pageSub">Deterministic Quant Engine &amp; Gemini AI Advisory</p>
     </div>
     <div class="topbar-right">
+      <!-- Live Risk Profile Switcher -->
+      <div class="risk-switcher-top" id="riskSwitcherTop">
+        <span class="risk-switcher-label">Risk Profile:</span>
+        <div class="risk-pill-group">
+          <button class="risk-pill-btn" id="risk-btn-Conservative" onclick="changeRiskProfile('Conservative')">Conservative</button>
+          <button class="risk-pill-btn active" id="risk-btn-Moderate" onclick="changeRiskProfile('Moderate')">Moderate</button>
+          <button class="risk-pill-btn" id="risk-btn-Aggressive" onclick="changeRiskProfile('Aggressive')">Aggressive</button>
+        </div>
+      </div>
       <div class="date-badge" id="dateBadge">–</div>
-      <button class="btn-refresh" onclick="loadAllData()" title="Refresh">↻</button>
+      <button class="btn-refresh" onclick="refreshCurrentView()" title="Refresh Audit">↻</button>
     </div>
   </header>
 
-  <!-- ── SECTION: OVERVIEW ── -->
-  <section class="dash-section active" id="section-overview">
+  <!-- ═══════════════════════════════════════════════════ 1. SECTION: MF OVERVIEW -->
+  <section class="dash-section active" id="section-mf-overview">
 
-    <!-- Row 1: 4 stat cards -->
+    <!-- Top Fold Stat Grid -->
+    <div class="stat-grid">
+      <div class="stat-card" style="--card-color: var(--white)">
+        <div class="stat-label">Total Portfolio Value</div>
+        <div class="stat-val" id="mfValTotal">–</div>
+        <div class="stat-sub" id="mfValCost">Cost: –</div>
+        <div class="stat-icon">💼</div>
+      </div>
+      <div class="stat-card" style="--card-color: var(--white)">
+        <div class="stat-label">Total Unrealized Gain</div>
+        <div class="stat-val text-success" id="mfValGain">–</div>
+        <div class="stat-sub" id="mfValGainPct">Return: –</div>
+        <div class="stat-icon">📈</div>
+      </div>
+      <div class="stat-card" style="--card-color: var(--white)">
+        <div class="stat-label">Consolidated Portfolio XIRR</div>
+        <div class="stat-val text-primary" id="mfValXIRR">–</div>
+        <div class="stat-sub">Newton-Raphson annualized return</div>
+        <div class="stat-icon">🧮</div>
+      </div>
+      <div class="stat-card" style="--card-color: var(--white)">
+        <div class="stat-label">Holdings &amp; Plans</div>
+        <div class="stat-val" id="mfValHoldingsCount">–</div>
+        <div class="stat-sub" id="mfValPlanBreakdown">Direct vs Regular</div>
+        <div class="stat-icon">📑</div>
+      </div>
+    </div>
+
+    <!-- Row: Health Gauge & Asset Allocation & Distributor Drag Card -->
+    <div class="row-3-cards">
+      
+      <!-- Card 1: Circular Health Score Gauge -->
+      <div class="card card-health-gauge">
+        <div class="card-header">
+          <div class="card-title">Portfolio Health Score</div>
+          <div class="card-badge badge-glow" id="healthScoreBadge">Institutional Audit</div>
+        </div>
+        <div class="gauge-container">
+          <div class="gauge-ring-wrap">
+            <canvas id="gaugeCanvas" width="160" height="160"></canvas>
+            <div class="gauge-inner">
+              <span class="gauge-num" id="gaugeScoreNum">–</span>
+              <small class="gauge-sub">/ 100</small>
+            </div>
+          </div>
+          <div class="gauge-details">
+            <div class="gauge-status-title" id="gaugeStatusTitle">Evaluating Quality</div>
+            <p class="gauge-desc" id="gaugeVerdictDesc">Analyzing expense leakage, risk drift, and performance alpha...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Asset Allocation Bar & Drift Badge -->
+      <div class="card card-allocation">
+        <div class="card-header">
+          <div class="card-title">Asset Allocation &amp; Drift</div>
+          <div class="card-badge" id="driftStatusBadge">Aligned</div>
+        </div>
+        <div class="alloc-bar-container">
+          <div class="alloc-stacked-bar">
+            <div class="alloc-seg alloc-equity" id="allocBarEquity" style="width: 37.58%;"></div>
+            <div class="alloc-seg alloc-debt" id="allocBarDebt" style="width: 42.23%;"></div>
+            <div class="alloc-seg alloc-commodities" id="allocBarCommodities" style="width: 20.20%;"></div>
+            <div class="alloc-seg alloc-liquid" id="allocBarLiquid" style="width: 0%;"></div>
+          </div>
+          <div class="alloc-legend">
+            <div class="alloc-legend-item">
+              <span class="alloc-dot dot-equity"></span>
+              <span class="alloc-lbl">Equity: <strong id="allocPctEquity">37.58%</strong></span>
+            </div>
+            <div class="alloc-legend-item">
+              <span class="alloc-dot dot-debt"></span>
+              <span class="alloc-lbl">Debt: <strong id="allocPctDebt">42.23%</strong></span>
+            </div>
+            <div class="alloc-legend-item">
+              <span class="alloc-dot dot-commodities"></span>
+              <span class="alloc-lbl">Commodities: <strong id="allocPctCommodities">20.20%</strong></span>
+            </div>
+            <div class="alloc-legend-item">
+              <span class="alloc-dot dot-liquid"></span>
+              <span class="alloc-lbl">Liquid: <strong id="allocPctLiquid">0.0%</strong></span>
+            </div>
+          </div>
+        </div>
+        <div class="drift-box" id="driftBox">
+          <div class="drift-target-txt">Target Range for <span id="driftProfileName">Moderate</span>: <strong id="driftTargetRange">50%–70%</strong></div>
+          <div class="drift-rec-txt" id="driftRecText">Loading allocation analysis...</div>
+        </div>
+      </div>
+
+      <!-- Card 3: Distributor Commission Drag Alert Card -->
+      <div class="card card-cost-drag">
+        <div class="card-header">
+          <div class="card-title">Distributor Drag &amp; Wealth Leakage</div>
+          <div class="card-badge badge-warning" id="costDragBadge">Regular Plans</div>
+        </div>
+        <div class="cost-drag-metrics">
+          <div class="cost-stat-row">
+            <span class="cost-stat-lbl">Regular Plan Corpus:</span>
+            <span class="cost-stat-val" id="dragRegularCorpus">–</span>
+          </div>
+          <div class="cost-stat-row">
+            <span class="cost-stat-lbl">Annual Intermediary Leakage:</span>
+            <span class="cost-stat-val text-danger" id="dragAnnualAmount">–</span>
+          </div>
+          <div class="leakage-highlight-box">
+            <div class="leakage-title">10-Year Compounded Wealth Loss:</div>
+            <div class="leakage-amount text-danger" id="drag10YrLoss">–</div>
+            <div class="leakage-sub" id="drag10YrDirectComparison">Direct plan would yield significantly higher capital</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row: Quick Action Alerts & Key Recommendations Preview -->
+    <div class="row-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🚨 Key Risk &amp; Hygiene Alerts</div>
+          <div class="card-badge" id="alertsCountBadge">AI Prioritized</div>
+        </div>
+        <div class="alerts-container" id="overviewAlertsContainer">
+          <!-- Dynamic Alert Banners -->
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎯 Fund Action Roadmap</div>
+          <div class="card-badge">SEBI Aligned</div>
+        </div>
+        <div class="actions-preview-list" id="overviewActionsList">
+          <!-- Dynamic Action Cards -->
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ 2. SECTION: MF HOLDINGS & FORM -->
+  <section class="dash-section" id="section-mf-holdings">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Mutual Fund Holdings &amp; 4-Tier Form Diagnostics</div>
+        <div class="table-actions">
+          <span class="legend-pill in-form">🟢 In-Form</span>
+          <span class="legend-pill on-track">🟡 On-Track</span>
+          <span class="legend-pill off-track">🟠 Off-Track</span>
+          <span class="legend-pill out-of-form">🔴 Out-of-Form</span>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="mf-table" id="mfHoldingsTable">
+          <thead>
+            <tr>
+              <th>Scheme Name &amp; Folio</th>
+              <th>Category</th>
+              <th>Plan</th>
+              <th>Invested Cost</th>
+              <th>Current Value</th>
+              <th>Weight %</th>
+              <th>Gain %</th>
+              <th>Fund XIRR</th>
+              <th>1Y / 3Y CAGR</th>
+              <th>Alpha vs Benchmark</th>
+              <th>Form Status</th>
+            </tr>
+          </thead>
+          <tbody id="mfHoldingsTableBody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 16px;">
+      <div class="card-header">
+        <div class="card-title">Form Classifier Rationales &amp; Rolling Metrics</div>
+      </div>
+      <div class="form-rationales-grid" id="formRationalesGrid">
+        <!-- Dynamic Rationale Cards -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ 3. SECTION: MF OVERLAP MATRIX & SPATIAL VENN -->
+  <section class="dash-section" id="section-mf-overlap">
+    
+    <!-- Sub-navigation Tabs -->
+    <div class="overlap-tabs-wrap">
+      <div class="overlap-subtabs">
+        <button class="overlap-tab-btn active" data-tab="spatial-flower">
+          <span>🌸</span> Spatial Flower Venn
+        </button>
+        <button class="overlap-tab-btn" data-tab="pairwise-sim">
+          <span>⚯</span> Dynamic Pairwise Venn
+        </button>
+        <button class="overlap-tab-btn" data-tab="stock-explorer">
+          <span>🏛️</span> Cross-Fund Stock Explorer
+        </button>
+      </div>
+      <div class="card-badge" id="overlapSummaryBadge">Multi-Fund Topology</div>
+    </div>
+
+    <!-- TAB 1: SPATIAL FLOWER VENN DIAGRAM -->
+    <div class="overlap-panel active" id="overlap-panel-spatial-flower">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🌸 Multi-Fund Spatial Flower Venn Topology</div>
+            <div class="card-sub">Interactive visual constellation mapping equity overlap across all mutual funds simultaneously. Intersecting petals highlight shared weights.</div>
+          </div>
+          <div class="flower-controls">
+            <span class="legend-pill" style="background:#ECFDF5; color:#065F46;">🟢 &lt;10% Low</span>
+            <span class="legend-pill" style="background:#FEF3C7; color:#92400E;">🟡 10-25% Moderate</span>
+            <span class="legend-pill" style="background:#FEE2E2; color:#991B1B;">🔴 &gt;25% High</span>
+          </div>
+        </div>
+
+        <div class="spatial-flower-canvas-wrap">
+          <svg id="spatialFlowerSvg" width="100%" height="460" viewBox="0 0 850 460"></svg>
+          <div class="flower-tooltip" id="flowerTooltip"></div>
+        </div>
+
+        <div class="flower-details-bar" id="flowerDetailsBar">
+          <div class="flower-bar-title" id="flowerBarTitle">Hover or click any fund petal to inspect its shared stock connections</div>
+          <div class="flower-tags" id="flowerSelectedTags"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: DYNAMIC PAIRWISE VENN SIMULATOR (PowerUp Ultra) -->
+    <div class="overlap-panel" id="overlap-panel-pairwise-sim">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">⚯ Dynamic Pairwise Venn Diagram Simulator</div>
+            <div class="card-sub">Select any two mutual funds to compute exact geometrical overlap, common constituents, and diversification rating.</div>
+          </div>
+        </div>
+
+        <!-- Pairwise Fund Selectors -->
+        <div class="pairwise-selectors-grid">
+          <div class="fund-select-box">
+            <label class="fund-select-lbl">Fund A</label>
+            <select class="fund-select-dropdown" id="fundSelectA"></select>
+          </div>
+          <div class="pairwise-vs-pill">VS</div>
+          <div class="fund-select-box">
+            <label class="fund-select-lbl">Fund B</label>
+            <select class="fund-select-dropdown" id="fundSelectB"></select>
+          </div>
+        </div>
+
+        <!-- Venn Visual Showcase -->
+        <div class="pairwise-venn-stage">
+          <div class="venn-interactive-viewport">
+            <svg id="pairwiseVennSvg" width="100%" height="200" viewBox="0 0 500 200"></svg>
+          </div>
+
+          <div class="venn-score-hero">
+            <div class="venn-overlap-number" id="vennOverlapNumber">0.00% Overlap</div>
+            <div class="venn-badges-row">
+              <span class="venn-pill-badge badge-overlap-lvl" id="vennOverlapLvlBadge">Low Overlap</span>
+              <span class="venn-pill-badge badge-diversification" id="vennDiversificationBadge">Good Diversification</span>
+            </div>
+            <p class="venn-diagnosis-text" id="vennDiagnosisText">Funds show very low overlap, indicating good diversification between both funds.</p>
+          </div>
+        </div>
+
+        <!-- Common Stocks Breakdown Table -->
+        <div class="common-stocks-header">
+          <div class="common-stocks-title">Common Constituent Stocks (<span id="commonStocksCount">0</span>)</div>
+          <input type="text" id="commonStocksSearch" class="stocks-search-input" placeholder="Search common stocks…">
+        </div>
+
+        <div class="table-responsive">
+          <table class="mf-table">
+            <thead>
+              <tr>
+                <th>Common Stock</th>
+                <th id="hdrFundAWeight">% Weight in Fund A</th>
+                <th id="hdrFundBWeight">% Weight in Fund B</th>
+                <th>Overlap Contribution</th>
+              </tr>
+            </thead>
+            <tbody id="commonStocksTableBody">
+              <!-- Dynamic Rows -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 3: CROSS-FUND STOCK EXPLORER -->
+    <div class="overlap-panel" id="overlap-panel-stock-explorer">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🏛️ Consolidated Cross-Fund Stock Exposure</div>
+            <div class="card-sub">Discover all underlying company equities held across multiple mutual funds in your portfolio.</div>
+          </div>
+          <input type="text" id="crossStockSearch" class="stocks-search-input" placeholder="Search underlying companies…">
+        </div>
+
+        <div class="table-responsive">
+          <table class="mf-table">
+            <thead>
+              <tr>
+                <th>Underlying Stock / Company</th>
+                <th>Funds Holding This Stock</th>
+                <th>Fund Count</th>
+                <th>Aggregated Portfolio Weight</th>
+              </tr>
+            </thead>
+            <tbody id="crossStockTableBody">
+              <!-- Dynamic Cross-Fund Rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Pairwise Overlap Summary Cards Grid -->
+    <div class="card" style="margin-top: 20px;">
+      <div class="card-header">
+        <div class="card-title">All Pairwise Overlap Matrix Cards</div>
+      </div>
+      <div class="overlap-grid" id="overlapPairsGrid">
+        <!-- Dynamic Overlap Cards -->
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ 4. SECTION: AI ADVISORY & REBALANCE -->
+  <section class="dash-section" id="section-mf-advisory">
+    
+    <!-- Gemini Synthesis Verdict Banner -->
+    <div class="card card-verdict">
+      <div class="card-header">
+        <div class="card-title">✦ Google Gemini AI Portfolio Verdict</div>
+        <div class="card-badge badge-ai">Structured GenAI</div>
+      </div>
+      <p class="verdict-lead-text" id="aiVerdictText">Synthesizing institutional quant findings...</p>
+    </div>
+
+    <!-- Full Action Recommendations -->
+    <div class="card" style="margin-top: 16px;">
+      <div class="card-header">
+        <div class="card-title">Actionable Fund Recommendations</div>
+      </div>
+      <div class="recommendations-grid" id="fullRecommendationsGrid">
+        <!-- Dynamic Action Cards -->
+      </div>
+    </div>
+
+    <!-- Step-by-Step Rebalance Checklist -->
+    <div class="card" style="margin-top: 16px;">
+      <div class="card-header">
+        <div class="card-title">Chronological Rebalancing Checklist</div>
+        <div class="card-badge">Interactive Execution</div>
+      </div>
+      <div class="checklist-container" id="rebalanceChecklistContainer">
+        <!-- Interactive Checkbox Steps -->
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ SPENDING SECTIONS ═══════════════════════════════════════════════════ -->
+  <section class="dash-section" id="section-spending-overview">
     <div class="stat-grid">
       <div class="stat-card" style="--card-color: var(--blush)">
         <div class="stat-label">Total Income</div>
@@ -109,201 +495,80 @@
       </div>
     </div>
 
-    <!-- Row 2: Categories pie + Expenses by Category (Intelly top row) -->
     <div class="row-2">
-      <div class="card card-butter" id="cardCategories">
-        <div class="card-header">
-          <div class="card-title">Categories</div>
-          <div class="card-badge">Breakdown</div>
-        </div>
-        <div class="donut-wrap">
-          <canvas id="donutChart"></canvas>
-          <div class="donut-center">
-            <span id="donutTopCat">–</span>
-            <small>top spend</small>
-          </div>
-        </div>
+      <div class="card card-butter">
+        <div class="card-header"><div class="card-title">Spending Categories</div></div>
+        <div class="donut-wrap"><canvas id="donutChart"></canvas></div>
         <div class="legend" id="catLegend"></div>
       </div>
-
-      <div class="card card-blush" id="cardIncomeExpense">
-        <div class="card-header">
-          <div class="card-title">Expenditure Graph</div>
-          <div class="card-badge">Monthly</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="incomeExpenseChart"></canvas>
-        </div>
+      <div class="card card-blush">
+        <div class="card-header"><div class="card-title">Monthly Expenditure</div></div>
+        <div class="chart-wrap"><canvas id="incomeExpenseChart"></canvas></div>
       </div>
     </div>
-
-    <!-- Row 3: Sessions (total spent) + Visit Summary (spending trend) — Intelly middle row -->
-    <div class="row-3">
-      <div class="card card-sage">
-        <div class="card-header">
-          <div class="card-title">Total Spent</div>
-          <div class="card-badge">Sessions</div>
-        </div>
-        <div class="sessions-stats">
-          <div class="sess-item">
-            <div class="sess-val" id="sessAvg">–</div>
-            <div class="sess-lbl">avg / month</div>
-          </div>
-          <div class="sess-item">
-            <div class="sess-val" id="sessMin">–</div>
-            <div class="sess-lbl">minimum</div>
-          </div>
-          <div class="sess-item">
-            <div class="sess-val" id="sessMax">–</div>
-            <div class="sess-lbl">maximum</div>
-          </div>
-        </div>
-        <div class="chart-wrap" style="height:90px">
-          <canvas id="miniSpendChart"></canvas>
-        </div>
-        <div class="peak-day-badge" id="peakDayBadge">Peak: –</div>
-      </div>
-
-      <div class="card card-lavender">
-        <div class="card-header">
-          <div class="card-title">Spending Trend</div>
-          <div class="card-badge">Daily</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="trendChart"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- Row 4: Month-wise + Week-wise (Patient list equivalent) -->
-    <div class="row-4">
-      <div class="card card-peach">
-        <div class="card-header">
-          <div class="card-title">Month-wise Spending</div>
-          <div class="toggle-group">
-            <button class="toggle-btn active" onclick="switchMonthly('stacked')">Stacked</button>
-            <button class="toggle-btn" onclick="switchMonthly('line')">Line</button>
-          </div>
-        </div>
-        <div class="chart-wrap" style="height:200px">
-          <canvas id="monthlyChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card card-teal">
-        <div class="card-header">
-          <div class="card-title">Week-wise Spending</div>
-          <div class="card-badge">By day</div>
-        </div>
-        <div class="chart-wrap" style="height:200px">
-          <canvas id="weeklyChart"></canvas>
-        </div>
-      </div>
-    </div>
-
   </section>
 
-  <!-- ── SECTION: CATEGORIES ── -->
-  <section class="dash-section" id="section-categories">
-    <div class="card" style="margin-bottom:20px">
+  <section class="dash-section" id="section-spending-categories">
+    <div class="card">
       <div class="card-header"><div class="card-title">Expenses by Category</div></div>
       <div class="chart-wrap" style="height:320px"><canvas id="catBarChart"></canvas></div>
     </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Category Detail</div></div>
-      <div class="cat-table" id="catTable"></div>
-    </div>
   </section>
 
-  <!-- ── SECTION: TRENDS ── -->
-  <section class="dash-section" id="section-trends">
-    <div class="card" style="margin-bottom:20px">
+  <section class="dash-section" id="section-spending-trends">
+    <div class="card">
       <div class="card-header"><div class="card-title">Daily Spending Trend</div></div>
-      <div class="chart-wrap" style="height:300px"><canvas id="trendChartFull"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">Income vs Expense vs Savings</div></div>
-      <div class="chart-wrap" style="height:280px"><canvas id="ieChartFull"></canvas></div>
+      <div class="chart-wrap" style="height:280px"><canvas id="trendChartFull"></canvas></div>
     </div>
   </section>
 
-  <!-- ── SECTION: ANOMALIES ── -->
-  <section class="dash-section" id="section-anomalies">
+  <section class="dash-section" id="section-spending-anomalies">
     <div class="card">
-      <div class="card-header"><div class="card-title">⚡ Unusual Transactions</div>
-        <div class="card-badge" style="background:var(--blush)">AI Detected</div>
-      </div>
-      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:20px">Transactions more than 2 standard deviations above their category average.</p>
+      <div class="card-header"><div class="card-title">⚡ Unusual Transactions</div></div>
       <div id="anomalyList"></div>
-    </div>
-  </section>
-
-  <!-- ── SECTION: AI INSIGHTS ── -->
-  <section class="dash-section" id="section-insights">
-    <div class="insights-grid" id="insightsGrid"></div>
-  </section>
-
-  <!-- ── SECTION: RECOMMENDATIONS ── -->
-  <section class="dash-section" id="section-recommendations">
-    <div class="health-hero card">
-      <div class="health-hero-left">
-        <div class="card-title">Financial Health Score</div>
-        <div class="health-big-score" id="healthBigScore">–</div>
-        <div class="health-big-grade" id="healthBigGrade">–</div>
-        <div class="health-bars" id="healthBars"></div>
-      </div>
-      <div class="health-hero-right">
-        <canvas id="healthRingBig" width="160" height="160"></canvas>
-      </div>
-    </div>
-    <div class="tips-grid" id="tipsGrid"></div>
-  </section>
-
-  <!-- ── SECTION: TRANSACTIONS ── -->
-  <section class="dash-section" id="section-transactions">
-    <div class="card">
-      <div class="card-header"><div class="card-title">All Transactions</div>
-        <div id="txCount" style="font-size:0.8rem;color:var(--muted)"></div>
-      </div>
-      <div id="txList"></div>
-      <div class="pagination" id="pagination"></div>
     </div>
   </section>
 
 </main>
 
-<!-- ═══════════════════════════════════════════════════ RIGHT SIDEBAR -->
-<aside class="right-sidebar">
+<!-- ═══════════════════════════════════════════════════ RIGHT SIDEBAR (Quick Intelligence Drawer) -->
+<aside class="right-sidebar" id="rightSidebar">
 
-  <!-- Calendar Heatmap -->
+  <!-- AI Quick Alert Cards -->
   <div class="rs-card">
-    <div class="rs-title">Spending Calendar</div>
-    <div class="rs-month-nav">
-      <button onclick="prevMonth()">‹</button>
-      <span id="calMonthLabel">–</span>
-      <button onclick="nextMonth()">›</button>
-    </div>
-    <div class="cal-grid" id="calGrid"></div>
-    <div class="cal-legend">
-      <span style="font-size:0.7rem;color:var(--muted)">Low</span>
-      <div class="cal-legend-bar"></div>
-      <span style="font-size:0.7rem;color:var(--muted)">High</span>
+    <div class="rs-title">✦ Critical Actions</div>
+    <div id="rsQuickActions" class="rs-action-list">
+      <div class="rs-empty">Loading recommendations…</div>
     </div>
   </div>
 
-  <!-- AI Spending Alerts -->
-  <div class="rs-card">
-    <div class="rs-title">✦ AI Spending Alerts</div>
-    <div id="aiAlerts"></div>
+  <!-- Regular Plan Drag Warning -->
+  <div class="rs-card rs-card-blush">
+    <div class="rs-title">💸 Intermediary Commission</div>
+    <div class="rs-drag-stat" id="rsDragAmount">–</div>
+    <div class="rs-drag-sub" id="rsDragSub">Annual distributor fee leakage</div>
   </div>
 
-  <!-- Savings Wins -->
+  <!-- Investor Details -->
   <div class="rs-card rs-card-sage">
-    <div class="rs-title">🌿 Savings Wins</div>
-    <div id="savingsWins"></div>
+    <div class="rs-title">👤 Investor Profile</div>
+    <div class="investor-info-row">
+      <span class="info-k">Name:</span>
+      <span class="info-v" id="rsInvestorName">–</span>
+    </div>
+    <div class="investor-info-row">
+      <span class="info-k">PAN:</span>
+      <span class="info-v" id="rsInvestorPan">–</span>
+    </div>
+    <div class="investor-info-row">
+      <span class="info-k">Period:</span>
+      <span class="info-v" id="rsInvestorPeriod">–</span>
+    </div>
   </div>
 
 </aside>
+
+<div class="toast" id="toast"></div>
 
 <script src="/static/js/dashboard.js"></script>
 </body>

@@ -53,6 +53,7 @@ class AIEngine:
             "total_current_value_inr": portfolio.total_current_value,
             "total_cost_value_inr": portfolio.total_cost_value,
             "total_gain_inr": portfolio.total_gain,
+            "portfolio_xirr_pct": quant.portfolio_xirr,
             "risk_profile": risk_profile,
             "holdings_count": len(portfolio.holdings),
         }
@@ -61,11 +62,13 @@ class AIEngine:
         for h in portfolio.holdings:
             holdings_data.append({
                 "scheme_name": h.scheme_name,
-                "plan_type": h.plan_type,
                 "category": h.category,
+                "plan_type": h.plan_type,
                 "current_value": h.current_value,
                 "cost_value": h.cost_value,
-                "gain_pct": h.return_percentage,
+                "portfolio_weight_pct": h.portfolio_weight_pct,
+                "return_percentage": h.return_percentage,
+                "xirr": h.xirr,
             })
 
         rolling_cagrs = [c.model_dump() for c in quant.rolling_cagrs]
@@ -90,16 +93,16 @@ DO NOT recalculate or hallucinate mathematical figures. Reason strictly over the
 {json.dumps(holdings_data, indent=2)}
 
 ### 3. QUANTITATIVE DIAGNOSTICS
-- **Rolling CAGR & Alpha vs Category Benchmarks**:
+- **Portfolio & Fund XIRR / Rolling CAGR & Alpha vs Category Benchmarks**:
 {json.dumps(rolling_cagrs, indent=2)}
 
-- **4-Tier Form Classifications**:
+- **4-Tier Form Classifications (In-Form, On-Track, Off-Track, Out-of-Form)**:
 {json.dumps(form_ratings, indent=2)}
 
-- **Cost Drag Analysis (Regular vs Direct Expense Drag)**:
+- **Cost Drag Analysis (Regular vs Direct Expense Drag & 10-Year Compounding Loss)**:
 {json.dumps(cost_drag, indent=2)}
 
-- **Asset Allocation**:
+- **Asset Allocation (Equity / Debt / Commodities / Liquid)**:
 {json.dumps(asset_allocation, indent=2)}
 
 - **Asset Drift vs {risk_profile} Target Range**:
@@ -110,7 +113,7 @@ DO NOT recalculate or hallucinate mathematical figures. Reason strictly over the
 
 ### INSTRUCTIONS:
 Synthesize this quantitative audit into a structured output conforming strictly to the requested schema:
-1. 'health_score': An integer (0-100) reflecting overall portfolio quality, penalizing regular commission drag, chronic underperformance, severe asset drift, and stock overlap.
+1. 'health_score': An integer (0-100) reflecting overall portfolio hygiene, heavily penalizing regular commission drag, chronic underperformance, severe asset drift, and stock overlap.
 2. 'risk_alignment_verdict': Detailed synthesis of risk drift and suitability for a '{risk_profile}' investor.
 3. 'key_alerts': Severity-tagged alerts (HIGH, MEDIUM, LOW) capturing critical risks (e.g. Regular plan commission drag, high overlap, out-of-form funds).
 4. 'fund_recommendations': Actionable advice for EVERY holding ('HOLD', 'CONTINUE_SIP', 'PAUSE_SIP', 'SWITCH_TO_DIRECT', 'EXIT_AND_REINVEST') with concrete rationale.
@@ -197,7 +200,7 @@ Synthesize this quantitative audit into a structured output conforming strictly 
                     severity="HIGH" if quant.asset_drift.drift_status == "High Risk Drift" else "MEDIUM",
                     title=f"Asset Allocation Drift ({quant.asset_drift.drift_status})",
                     description=quant.asset_drift.recommendation,
-                    affected_schemes=[h.scheme_name for h in portfolio.holdings if h.category == "Equity"],
+                    affected_schemes=[h.scheme_name for h in portfolio.holdings if h.category in ["Equity", "Large Cap", "Mid Cap", "Small Cap", "Flexi Cap"]],
                 )
             )
 
