@@ -549,54 +549,66 @@ The application automatically normalizes many common CSV formats, including diff
 
 # 📸 Screenshots
 
-## Bank Spending Analytics *(Original Core Features)*
+## 💳 Bank Spending Analytics *(Core Platform Features)*
 
-### Landing Page
-
+### 1. Landing Page & Dual-Mode Ingestion Gateway
 ![Landing Page](assets/LandingPage.png)
 
 ----
 
-### Dashboard Overview
-
+### 2. Spending Dashboard Overview (Cashflow KPIs, Donut Breakdown & Monthly Overview)
 ![Dashboard](assets/Dashboard.png)
 
 ----
 
-### Financial Health Score
+### 3. Expenses by Category Breakdown & Distribution
+![Expenses by Category](assets/SpendingCategories.png)
 
+----
+
+### 4. Daily Spending Trends & Historical Expenditure Series
+![Daily Spending Trends](assets/SpendingTrends.png)
+
+----
+
+### 5. Unusual Transactions & Statistical Anomaly Detection
+![Unusual Transactions & Anomalies](assets/SpendingAnomalies.png)
+
+----
+
+### 6. Financial Health Score & Spending Stability Metrics
 ![Health Score](assets/HealthScore.png)
 
 ---
 
-## Mutual Fund Portfolio Intelligence & AI Advisor *(Jyotishman's Features)*
+## 📊 Mutual Fund Portfolio Intelligence & AI Advisor *(Jyotishman's Features)*
 
-### Portfolio Overview, XIRR & Risk Drift
-
+### 1. Portfolio Overview, Newton-Raphson XIRR & Risk Drift Gauge
 ![MF Portfolio Audit](assets/MFPortfolioAudit.png)
 
 ----
 
-### Pairwise Stock Overlap Matrix & Concentration Analysis
-
-![Stock Overlap Matrix](assets/StockOverlap.png)
-
-----
-
-### Holdings Breakdown & 4-Tier Rolling Return Form Ratings
-
+### 2. Holdings Breakdown, 4-Tier Rolling Return Form & Alpha Attribution
 ![Holdings & Rolling Form](assets/HoldingsRollingForm.png)
 
 ----
 
-### FinWise AI Conversational Advisor with Dynamic Chart Artifacts
+### 3. Multi-Fund Spatial Flower Venn & Pairwise Stock Overlap Simulator
+![Stock Overlap Matrix](assets/StockOverlap.png)
 
+----
+
+### 4. Actionable Recommendations & Chronological 30-Day Rebalancing Checklist
+![MF Advisory & Action Plan](assets/MFAdvisoryActions.png)
+
+----
+
+### 5. FinWise Conversational AI Advisor with Dynamic Chart Artifacts & Tax Engine
 ![AI Chatbot Advisor](assets/AIChatbotAdvisor.png)
 
 ----
 
-### System Architecture & Contributor Attribution
-
+### 6. System Architecture & Contributor Attribution
 ![Architecture & About](assets/ArchitectureAbout.png)
 
 ---
