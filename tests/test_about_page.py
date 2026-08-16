@@ -19,7 +19,13 @@ def test_about_page_status_and_content(client):
     assert "About — FinWise AI & Architecture" in html
     assert "Fin" in html and "Wise" in html
     
-    # Verify Core Tech Architecture items
+    # Verify Core Tech Architecture items (Dual Pillars)
+    assert "Financial Spending Analyzer &amp; Cash Flow Engine" in html or "Financial Spending Analyzer & Cash Flow Engine" in html
+    assert "Gaussian Outlier Engine" in html
+    assert "CSV Normalization" in html
+    assert "Heuristic Category Classifier" in html
+
+    assert "Mutual Fund Intelligence &amp; Tri-Hybrid RAG Platform" in html or "Mutual Fund Intelligence & Tri-Hybrid RAG Platform" in html
     assert "Google Gemini" in html
     assert "Supabase Postgres" in html
     assert "LanceDB &amp; Cloudflare R2" in html or "LanceDB & Cloudflare R2" in html

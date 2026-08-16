@@ -179,6 +179,38 @@
     padding: 3px 8px; border-radius: 6px; border: 1px solid #E2E8F0;
   }
 
+  /* ── Architecture Pillar Grouping ── */
+  .arch-pillar {
+    margin-bottom: 56px;
+  }
+  .pillar-header-banner {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .pillar-meta {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .pillar-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+  }
+  .pillar-title {
+    font-family: 'Playfair Display', serif; font-size: 1.28rem; font-weight: 700; color: var(--ink);
+  }
+  .pillar-author {
+    font-size: 0.84rem; color: var(--muted); font-weight: 500;
+  }
+  .pillar-badge {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 5px 12px; border-radius: 20px;
+  }
+
   /* ── Team Contributor Cards ── */
   .team-grid {
     display: grid;
@@ -219,7 +251,22 @@
     font-size: 0.88rem; font-weight: 600; color: var(--muted);
   }
   .contributor-bio {
-    font-size: 0.94rem; color: var(--ink2); line-height: 1.6; margin-bottom: 24px; flex-grow: 1;
+    font-size: 0.94rem; color: var(--ink2); line-height: 1.6; margin-bottom: 20px;
+  }
+  .contributor-stack-wrap {
+    margin-bottom: 24px; flex-grow: 1;
+  }
+  .contributor-stack-title {
+    font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  .contributor-stack-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .contributor-stack-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; font-weight: 500;
+    padding: 3px 8px; border-radius: 6px;
+    background: rgba(26,26,46,0.04); color: var(--ink2); border: 1px solid rgba(26,26,46,0.08);
   }
   .contributor-links {
     display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--border); padding-top: 20px;
@@ -316,155 +363,283 @@
       <h2 class="section-title" id="arch-title">Core Technology Architecture</h2>
     </div>
 
-    <div class="tech-grid">
-      <!-- 1. AI & Intent Routing -->
-      <div class="tech-card" style="--accent-color:#4F46E5; --icon-bg:#EEF2FF; --icon-color:#4F46E5;">
-        <div class="tech-card-header">
-          <div class="tech-icon-wrap">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>
-              <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0-2 2a2 2 0 0 0-2-2a2 2 0 0 0 2-2"/>
-              <path d="M19 11h2m-1-1v2"/>
-            </svg>
-          </div>
+    <!-- ═══ PILLAR 1: SPENDING ANALYZER PLATFORM (SAKSHI) ═══ -->
+    <div class="arch-pillar">
+      <div class="pillar-header-banner">
+        <div class="pillar-meta">
+          <div class="pillar-icon" style="background:#FFF0F3; color:#E11D48;">💳</div>
           <div>
-            <span class="tech-tier-badge">AI Orchestration</span>
-            <div class="tech-card-title">Google Gemini 3.7</div>
+            <div class="pillar-title">Financial Spending Analyzer &amp; Cash Flow Engine</div>
+            <div class="pillar-author">Core Architecture &amp; Foundation • Engineered by Sakshi Singh Tanwar</div>
           </div>
         </div>
-        <p class="tech-card-desc">
-          Structured tool-calling pipeline with a 1M+ token context window. Employs zero-hallucination guardrails and statutory regulatory disclaimers modeled after Groww G.1 architecture.
-        </p>
-        <div class="tech-tags">
-          <span class="tech-tag">Structured Output</span>
-          <span class="tech-tag">Pydantic Schemas</span>
-          <span class="tech-tag">Fast-Fail Quota</span>
-        </div>
+        <span class="pillar-badge" style="background:#FFE4E6; color:#BE123C;">Spending Subsystem</span>
       </div>
 
-      <!-- 2. Tier 1 - SQL Deterministic Rules -->
-      <div class="tech-card" style="--accent-color:#059669; --icon-bg:#ECFDF5; --icon-color:#059669;">
-        <div class="tech-card-header">
-          <div class="tech-icon-wrap">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="12" cy="5" rx="9" ry="3"/>
-              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-              <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
-            </svg>
+      <div class="tech-grid">
+        <!-- 1.1 Ingestion & Preprocessing -->
+        <div class="tech-card" style="--accent-color:#E11D48; --icon-bg:#FFF1F2; --icon-color:#E11D48;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">Data Ingestion</span>
+              <div class="tech-card-title">CSV Normalization &amp; Cleaning</div>
+            </div>
           </div>
-          <div>
-            <span class="tech-tier-badge">Tier 1 • Rule Engine</span>
-            <div class="tech-card-title">Supabase Postgres</div>
+          <p class="tech-card-desc">
+            Automated multi-bank CSV statement preprocessing pipeline. Cleans debit/credit columns, standardizes date formats, eliminates corrupted rows, and handles varying bank export schemas.
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">Pandas</span>
+            <span class="tech-tag">io.StringIO</span>
+            <span class="tech-tag">Data Cleansing</span>
           </div>
         </div>
-        <p class="tech-card-desc">
-          Deterministic SQL rule engine with Row-Level Security (RLS). Houses official exit load schedules, statutory asset allocation mandates, and user audit session persistence.
-        </p>
-        <div class="tech-tags">
-          <span class="tech-tag">PostgreSQL</span>
-          <span class="tech-tag">RLS Security</span>
-          <span class="tech-tag">SID Mandates</span>
+
+        <!-- 1.2 Heuristic Categorization -->
+        <div class="tech-card" style="--accent-color:#D97706; --icon-bg:#FFFBEB; --icon-color:#D97706;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">NLP &amp; Classification</span>
+              <div class="tech-card-title">Heuristic Category Classifier</div>
+            </div>
+          </div>
+          <p class="tech-card-desc">
+            Rule-based taxonomy mapping ambiguous bank narrations into 7 distinct financial buckets (Housing &amp; Utilities, Groceries, Shopping, Travel, Entertainment, Healthcare, Investments).
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">Regex Taxonomy</span>
+            <span class="tech-tag">Rule Engine</span>
+            <span class="tech-tag">7-Category Clustering</span>
+          </div>
+        </div>
+
+        <!-- 1.3 Gaussian Anomaly Detection -->
+        <div class="tech-card" style="--accent-color:#DC2626; --icon-bg:#FEF2F2; --icon-color:#DC2626;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">Statistical Analytics</span>
+              <div class="tech-card-title">Gaussian Outlier Engine (Z &gt; 2.0)</div>
+            </div>
+          </div>
+          <p class="tech-card-desc">
+            Two-tailed Gaussian distribution model ($Z = \frac{x - \mu}{\sigma}$) isolating abnormal transaction spikes from baseline category averages to flag one-off spending shocks.
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">Z-Score Outliers</span>
+            <span class="tech-tag">NumPy Math</span>
+            <span class="tech-tag">Gaussian Filter</span>
+          </div>
+        </div>
+
+        <!-- 1.4 Interactive Cash Flow Dashboard -->
+        <div class="tech-card" style="--accent-color:#0284C7; --icon-bg:#F0F9FF; --icon-color:#0284C7;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="21" x2="9" y2="9"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">Frontend Analytics</span>
+              <div class="tech-card-title">Spending Visuals &amp; Savings Rate</div>
+            </div>
+          </div>
+          <p class="tech-card-desc">
+            Interactive visual dashboards delivering monthly income vs outflow comparisons, category expense doughnuts, net savings accumulation, and personal savings rate percentages.
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">Chart.js</span>
+            <span class="tech-tag">D3.js Heatmaps</span>
+            <span class="tech-tag">Savings Rate Metric</span>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- 3. Tier 2 - Serverless Vector Store -->
-      <div class="tech-card" style="--accent-color:#0284C7; --icon-bg:#F0F9FF; --icon-color:#0284C7;">
-        <div class="tech-card-header">
-          <div class="tech-icon-wrap">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-              <polyline points="2 17 12 22 22 17"/>
-              <polyline points="2 12 12 17 22 12"/>
-            </svg>
-          </div>
+    <!-- ═══ PILLAR 2: MUTUAL FUND AI & QUANT PLATFORM (SEZAR) ═══ -->
+    <div class="arch-pillar">
+      <div class="pillar-header-banner">
+        <div class="pillar-meta">
+          <div class="pillar-icon" style="background:#EEF2FF; color:#4F46E5;">📈</div>
           <div>
-            <span class="tech-tier-badge">Tier 2 • Vector RAG</span>
-            <div class="tech-card-title">LanceDB &amp; Cloudflare R2</div>
+            <div class="pillar-title">Mutual Fund Intelligence &amp; Tri-Hybrid RAG Platform</div>
+            <div class="pillar-author">AI Layer, Quant Engine &amp; RAG Architecture • Engineered by Sezar (Jyotishman)</div>
           </div>
         </div>
-        <p class="tech-card-desc">
-          Serverless embedded vector store reading Parquet indices over Cloudflare R2 with $0 egress fees. Fast approximate nearest neighbors (ANN) across 500+ mutual fund factsheets.
-        </p>
-        <div class="tech-tags">
-          <span class="tech-tag">LanceDB</span>
-          <span class="tech-tag">Cloudflare R2</span>
-          <span class="tech-tag">$0 Egress Storage</span>
-        </div>
+        <span class="pillar-badge" style="background:#E0E7FF; color:#3730A3;">Quant &amp; AI Subsystem</span>
       </div>
 
-      <!-- 4. Tier 3 - JIT In-Memory Parser -->
-      <div class="tech-card" style="--accent-color:#D97706; --icon-bg:#FFFBEB; --icon-color:#D97706;">
-        <div class="tech-card-header">
-          <div class="tech-icon-wrap">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <circle cx="11.5" cy="14.5" r="2.5"/>
-              <path d="M13.5 16.5L17 20"/>
-            </svg>
+      <div class="tech-grid">
+        <!-- 2.1 AI & Intent Routing -->
+        <div class="tech-card" style="--accent-color:#4F46E5; --icon-bg:#EEF2FF; --icon-color:#4F46E5;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>
+                <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0-2 2a2 2 0 0 0-2-2a2 2 0 0 0 2-2"/>
+                <path d="M19 11h2m-1-1v2"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">AI Orchestration</span>
+              <div class="tech-card-title">Google Gemini 3.7</div>
+            </div>
           </div>
-          <div>
-            <span class="tech-tier-badge">Tier 3 • JIT Parsing</span>
-            <div class="tech-card-title">PyMuPDF4LLM Streaming</div>
+          <p class="tech-card-desc">
+            Structured tool-calling pipeline with a 1M+ token context window. Employs zero-hallucination guardrails, fast-fail 429 quota handling, and SEBI disclaimers modeled after Groww G.1.
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">Structured Output</span>
+            <span class="tech-tag">Pydantic Schemas</span>
+            <span class="tech-tag">Zero-Latency Fallback</span>
           </div>
         </div>
-        <p class="tech-card-desc">
-          Zero-disk in-memory PDF parsing via Python <code>io.BytesIO</code> streams. Instantly digests password-protected CAMS/KFintech CAS statements and multi-format bank PDFs.
-        </p>
-        <div class="tech-tags">
-          <span class="tech-tag">PyMuPDF4LLM</span>
-          <span class="tech-tag">Zero-Disk Storage</span>
-          <span class="tech-tag">CAS Parser</span>
-        </div>
-      </div>
 
-      <!-- 5. Quant Engine -->
-      <div class="tech-card" style="--accent-color:#DC2626; --icon-bg:#FEF2F2; --icon-color:#DC2626;">
-        <div class="tech-card-header">
-          <div class="tech-icon-wrap">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-              <polyline points="16 7 22 7 22 13"/>
-            </svg>
+        <!-- 2.2 Tier 1 - SQL Deterministic Rules -->
+        <div class="tech-card" style="--accent-color:#059669; --icon-bg:#ECFDF5; --icon-color:#059669;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">Tier 1 • Rule Engine</span>
+              <div class="tech-card-title">Supabase Postgres</div>
+            </div>
           </div>
-          <div>
-            <span class="tech-tier-badge">Institutional Math</span>
-            <div class="tech-card-title">Quant Performance Engine</div>
+          <p class="tech-card-desc">
+            Deterministic SQL rule engine with Row-Level Security (RLS). Houses official exit load schedules, statutory asset allocation mandates, and user audit session persistence.
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">PostgreSQL</span>
+            <span class="tech-tag">RLS Security</span>
+            <span class="tech-tag">SID Mandates</span>
           </div>
         </div>
-        <p class="tech-card-desc">
-          Newton-Raphson multi-cashflow XIRR solver with SEBI &lt;180d short-vintage guards, pairwise stock overlap Venn matrices, rolling 1Y/3Y alpha, and Section 112A/50AA tax math.
-        </p>
-        <div class="tech-tags">
-          <span class="tech-tag">pyxirr</span>
-          <span class="tech-tag">quantstats</span>
-          <span class="tech-tag">4-Tier Form</span>
-        </div>
-      </div>
 
-      <!-- 6. Deployment & Automation -->
-      <div class="tech-card" style="--accent-color:#F4A7B9; --icon-bg:#FFF5F7; --icon-color:#E11D48;">
-        <div class="tech-card-header">
-          <div class="tech-icon-wrap">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
-              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
-              <line x1="6" y1="6" x2="6.01" y2="6"/>
-              <line x1="6" y1="18" x2="6.01" y2="18"/>
-            </svg>
+        <!-- 2.3 Tier 2 - Serverless Vector Store -->
+        <div class="tech-card" style="--accent-color:#0284C7; --icon-bg:#F0F9FF; --icon-color:#0284C7;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                <polyline points="2 17 12 22 22 17"/>
+                <polyline points="2 12 12 17 22 12"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">Tier 2 • Vector RAG</span>
+              <div class="tech-card-title">LanceDB &amp; Cloudflare R2</div>
+            </div>
           </div>
-          <div>
-            <span class="tech-tier-badge">Cloud Architecture</span>
-            <div class="tech-card-title">Serverless Vercel &amp; CI/CD</div>
+          <p class="tech-card-desc">
+            Serverless embedded vector store reading Parquet indices over Cloudflare R2 with $0 egress fees. Fast approximate nearest neighbors (ANN) across 500+ mutual fund factsheets.
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">LanceDB</span>
+            <span class="tech-tag">Cloudflare R2</span>
+            <span class="tech-tag">$0 Egress Storage</span>
           </div>
         </div>
-        <p class="tech-card-desc">
-          Stateless Python WSGI serverless deployment on Vercel with automated GitHub Actions offline batch indexing pipelines and continuous pytest suites.
-        </p>
-        <div class="tech-tags">
-          <span class="tech-tag">Vercel Serverless</span>
-          <span class="tech-tag">GitHub Actions</span>
-          <span class="tech-tag">100% CI Testing</span>
+
+        <!-- 2.4 Tier 3 - JIT In-Memory Parser -->
+        <div class="tech-card" style="--accent-color:#D97706; --icon-bg:#FFFBEB; --icon-color:#D97706;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <circle cx="11.5" cy="14.5" r="2.5"/>
+                <path d="M13.5 16.5L17 20"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">Tier 3 • JIT Parsing</span>
+              <div class="tech-card-title">PyMuPDF4LLM Streaming</div>
+            </div>
+          </div>
+          <p class="tech-card-desc">
+            Zero-disk in-memory PDF parsing via Python <code>io.BytesIO</code> streams. Instantly digests password-protected CAMS/KFintech CAS statements and multi-format bank PDFs.
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">PyMuPDF4LLM</span>
+            <span class="tech-tag">Zero-Disk Storage</span>
+            <span class="tech-tag">CAS Parser</span>
+          </div>
+        </div>
+
+        <!-- 2.5 Quant Engine -->
+        <div class="tech-card" style="--accent-color:#DC2626; --icon-bg:#FEF2F2; --icon-color:#DC2626;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                <polyline points="16 7 22 7 22 13"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">Institutional Math</span>
+              <div class="tech-card-title">Quant Performance Engine</div>
+            </div>
+          </div>
+          <p class="tech-card-desc">
+            Newton-Raphson multi-cashflow XIRR solver with SEBI &lt;180d short-vintage guards, pairwise stock overlap Venn matrices, rolling 1Y/3Y alpha, and Section 112A/50AA tax math.
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">pyxirr</span>
+            <span class="tech-tag">quantstats</span>
+            <span class="tech-tag">4-Tier Form</span>
+          </div>
+        </div>
+
+        <!-- 2.6 Deployment & Automation -->
+        <div class="tech-card" style="--accent-color:#F4A7B9; --icon-bg:#FFF5F7; --icon-color:#E11D48;">
+          <div class="tech-card-header">
+            <div class="tech-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                <line x1="6" y1="6" x2="6.01" y2="6"/>
+                <line x1="6" y1="18" x2="6.01" y2="18"/>
+              </svg>
+            </div>
+            <div>
+              <span class="tech-tier-badge">Cloud Architecture</span>
+              <div class="tech-card-title">Serverless Vercel &amp; CI/CD</div>
+            </div>
+          </div>
+          <p class="tech-card-desc">
+            Stateless Python WSGI serverless deployment on Vercel with automated GitHub Actions offline batch indexing pipelines and continuous pytest suites.
+          </p>
+          <div class="tech-tags">
+            <span class="tech-tag">Vercel Serverless</span>
+            <span class="tech-tag">GitHub Actions</span>
+            <span class="tech-tag">100% CI Testing</span>
+          </div>
         </div>
       </div>
     </div>
@@ -490,6 +665,20 @@
         <p class="contributor-bio">
           Designed and engineered the core <strong>Financial Spending Analyzer</strong> framework. Built the end-to-end bank statement parsing pipelines, category classification engine, expense trend heuristics, and statistical spending anomaly detection algorithms.
         </p>
+
+        <div class="contributor-stack-wrap">
+          <div class="contributor-stack-title">Core Technology Stack:</div>
+          <div class="contributor-stack-tags">
+            <span class="contributor-stack-tag">Python &amp; Flask</span>
+            <span class="contributor-stack-tag">Pandas &amp; NumPy</span>
+            <span class="contributor-stack-tag">Gaussian Z-Score Outlier Engine</span>
+            <span class="contributor-stack-tag">Regex Categorization Taxonomy</span>
+            <span class="contributor-stack-tag">Chart.js Visualizations</span>
+            <span class="contributor-stack-tag">D3.js Heatmaps</span>
+            <span class="contributor-stack-tag">CSV Stream Sanitization</span>
+          </div>
+        </div>
+
         <div class="contributor-links">
           <a href="https://github.com/slashthose" target="_blank" rel="noopener noreferrer" class="social-btn github" aria-label="Sakshi Singh Tanwar GitHub">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -518,6 +707,20 @@
         <p class="contributor-bio">
           Architected and implemented the <strong>Mutual Fund Intelligence Layer</strong>, Tri-Hybrid RAG routing pipeline, Newton-Raphson XIRR quant engine, SEBI short-vintage compounding baseline, Budget 2024 taxation engine, and the interactive Claude/Groww G.1 visual Chatbot advisor.
         </p>
+
+        <div class="contributor-stack-wrap">
+          <div class="contributor-stack-title">Core Technology Stack:</div>
+          <div class="contributor-stack-tags">
+            <span class="contributor-stack-tag">Google Gemini 3.7 (Structured Tools)</span>
+            <span class="contributor-stack-tag">Supabase Postgres &amp; RLS</span>
+            <span class="contributor-stack-tag">LanceDB &amp; Cloudflare R2</span>
+            <span class="contributor-stack-tag">PyMuPDF4LLM In-Memory Parser</span>
+            <span class="contributor-stack-tag">pyxirr &amp; quantstats Engine</span>
+            <span class="contributor-stack-tag">KaTeX LaTeX Renderer</span>
+            <span class="contributor-stack-tag">Vercel Serverless &amp; GitHub Actions</span>
+          </div>
+        </div>
+
         <div class="contributor-links">
           <a href="https://github.com/SezarTheGreat" target="_blank" rel="noopener noreferrer" class="social-btn github" aria-label="Sezar (Jyotishman) GitHub">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
