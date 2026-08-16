@@ -959,7 +959,24 @@ class ChatbotAdvisorEngine:
             return {"reply": sanitize_advisor_response(reply), "chart": chart}
 
         # ── 19. Direct vs Regular Plan Wealth Drag / Commission Leakage ────────
-        if any(re.search(r'\b' + re.escape(w) + r'\b', msg_lower) for w in ["regular", "regular plan", "regular plans", "direct plan", "distributor drag", "commission drag", "commission leakage", "fee leakage", "wealth drag", "expense ratio", "ter drag", "ter leakage", "distributor commission", "commission"]):
+        # Rule 19: Only fire for portfolio-level distributor/commission drag queries.
+        # Do NOT fire for external fund expense-ratio queries (e.g. "expense ratio of SBI Bluechip").
+        _is_external_fund_er_query = (
+            any(w in msg_lower for w in ["expense ratio", "ter", "portfolio turnover"])
+            and any(w in msg_lower for w in ["of ", "for ", "sbi bluechip", "hdfc top", "axis", "mirae", "nippon", "uti", "kotak", "franklin", "icici", "aditya"])
+            and not any(w in msg_lower for w in ["my portfolio", "my holdings", "my funds", "commission leakage", "distributor drag", "wealth drag", "fee leakage"])
+        )
+        _fires_rule19 = (not _is_external_fund_er_query) and (
+            any(re.search(r'\b' + re.escape(w) + r'\b', msg_lower) for w in [
+                "regular", "regular plan", "regular plans", "direct plan", "direct vs regular",
+                "regular vs direct", "distributor drag", "commission drag", "commission leakage",
+                "fee leakage", "wealth drag", "expense ratio", "ter drag", "ter leakage",
+                "distributor commission", "regular corpus",
+            ])
+            and not any(w in msg_lower for w in ["nav", "expense ratio of", "portfolio turnover of"])
+        )
+        if _fires_rule19:
+
             drag_data = quant_diagnostics.cost_drag if quant_diagnostics else None
             annual_drag = f"₹{drag_data.annual_expense_drag_amount:,.2f}" if drag_data else "₹0.00"
             ten_yr_drag = f"₹{drag_data.projected_10yr_cost_drag:,.2f}" if drag_data else "₹0.00"
@@ -1063,16 +1080,57 @@ class ChatbotAdvisorEngine:
             return {"reply": sanitize_advisor_response(reply), "chart": anomaly_chart}
 
         # ── 17. Specific Fund Holding Query ──────────────────────────────────
+        # Guard: detect if the user is asking about an EXTERNAL fund not in the portfolio
+        # (e.g. "NAV of HDFC Top 100", "expense ratio of SBI Bluechip") vs
+        # asking about one of their actual holdings.
+        _EXTERNAL_FUND_INTENT_SIGNALS = [
+            r"\bcurrent\s+nav\b", r"\bnav\s+of\b", r"\bnav\s+as\s+of\b",
+            r"\bexpense\s+ratio\s+(?:of|for)\b", r"\bportfolio\s+turnover\s+(?:of|for)\b",
+            r"\bsharpe\s+(?:ratio)?\s+of\b", r"\b(?:gives?|give\s+me)\s+(?:the\s+)?(?:return|performance)\s+of\b",
+            r"\blatest\s+nav\b", r"\bhistorical\s+(?:return|nav)\s+(?:chart|of|for)\b",
+        ]
+        _is_external_fund_query = any(
+            re.search(pat, msg_lower) for pat in _EXTERNAL_FUND_INTENT_SIGNALS
+        )
+
         matched_holding = None
         matched_cagr = None
         matched_form = None
 
-        if portfolio:
+        if portfolio and not _is_external_fund_query:
+            # Only attempt fuzzy holding match when NOT asking about an external fund
             for h in portfolio.holdings:
-                tokens = [t.lower() for t in h.scheme_name.split() if len(t) > 3 and t.lower() not in ["fund", "direct", "growth", "plan", "india", "asset", "quant", "equity", "short", "duration", "risk"]]
+                tokens = [
+                    t.lower() for t in h.scheme_name.split()
+                    if len(t) > 3 and t.lower() not in [
+                        "fund", "direct", "growth", "plan", "india", "asset",
+                        "quant", "equity", "short", "duration", "risk"
+                    ]
+                ]
                 if any(t in msg_lower for t in tokens):
                     matched_holding = h
                     break
+
+        # If user is asking about an external fund (not a portfolio holding), return honest data-scope message
+        if _is_external_fund_query:
+            holding_names = ", ".join(
+                [f"*{h.scheme_name}*" for h in portfolio.holdings[:5]]
+            ) + (" and more" if len(portfolio.holdings) > 5 else "") if portfolio else "your uploaded CAS portfolio holdings"
+            reply = (
+                "### 📡 External Fund Data Query\n\n"
+                "FinWise AI operates strictly as a **zero-hallucination quant engine** grounded on your **uploaded CAS / portfolio data**. "
+                "It does not connect to live market data feeds, AMC APIs, or external NAV databases in real time.\n\n"
+                "**What this means for your query:**\n"
+                "- **Live NAV lookups**, real-time **expense ratios**, or historical data for funds **not present in your uploaded portfolio** cannot be fetched or computed without a live data source.\n"
+                "- Fabricating or guessing NAV figures would violate the engine's **zero-hallucination principle**.\n\n"
+                f"**Your Uploaded Portfolio Contains:** {holding_names}\n\n"
+                "**To get this data for external funds, please use:**\n"
+                "- 📊 [AMFI India NAV Portal](https://www.amfiindia.com/nav-history-download.html) for historical NAVs\n"
+                "- 🔍 [Groww / MF Central / Kuvera](https://www.mfcentral.com/) for live NAV and scheme details\n"
+                "- 📄 [SEBI-registered fund house SID documents](https://www.sebi.gov.in) for expense ratios and portfolio turnover\n\n"
+                "*If you upload a CAS PDF or CSV containing this fund, FinWise will instantly provide its quant diagnostics, form rating, and alpha analysis.*"
+            )
+            return {"reply": sanitize_advisor_response(reply), "chart": None}
 
         if matched_holding and quant_diagnostics:
             for c in quant_diagnostics.rolling_cagrs:
