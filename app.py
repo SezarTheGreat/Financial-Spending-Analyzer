@@ -188,13 +188,19 @@ def get_summary(df):
     expenses = df[df['type']=='expense']['amount'].sum()
     savings = income - expenses
     sr = round(savings / income * 100, 1) if income > 0 else 0
+    spending_rate = round(expenses / income * 100, 1) if income > 0 else 0
+    start_str = df['date'].min().strftime('%d %b %Y') if len(df) else '—'
+    end_str = df['date'].max().strftime('%d %b %Y') if len(df) else '—'
     return {
         'total_income': round(income, 2),
         'total_expenses': round(expenses, 2),
         'net_savings': round(savings, 2),
         'savings_rate': sr,
+        'spending_rate': spending_rate,
         'total_transactions': len(df),
-        'date_range': {'start': df['date'].min().strftime('%d %b %Y'), 'end': df['date'].max().strftime('%d %b %Y')}
+        'start_date': start_str,
+        'end_date': end_str,
+        'date_range': {'start': start_str, 'end': end_str}
     }
 
 def get_categories(df):
@@ -203,9 +209,10 @@ def get_categories(df):
     cat = exp.groupby('category')['amount'].sum().sort_values(ascending=False).reset_index()
     total = cat['amount'].sum()
     if total == 0:
-        return {"labels": [], "values": [], "percentages": [], "colors": []}
+        return {"labels": [], "amounts": [], "values": [], "percentages": [], "colors": []}
     return {
         'labels': cat['category'].tolist(),
+        'amounts': cat['amount'].round(2).tolist(),
         'values': cat['amount'].round(2).tolist(),
         'percentages': (cat['amount'] / total * 100).round(1).tolist(),
         'colors': [CATEGORY_COLORS.get(c, '#E8E8E8') for c in cat['category']],
@@ -226,8 +233,11 @@ def get_monthly_overview(df):
     exp = df[df['type']=='expense']
     m = exp.groupby(['month','category'])['amount'].sum().unstack(fill_value=0).reset_index().sort_values('month')
     cats = [c for c in m.columns if c != 'month']
+    matrix = {c: m[c].round(2).tolist() for c in cats}
     return {
         'months': m['month'].tolist(),
+        'categories': cats,
+        'matrix': matrix,
         'series': [{'name': c, 'data': m[c].round(2).tolist(), 'color': CATEGORY_COLORS.get(c,'#E8E8E8')} for c in cats]
     }
 
@@ -242,6 +252,7 @@ def get_trends(df):
     daily = exp.groupby('date')['amount'].sum().reset_index()
     return {
         'dates': [d.strftime('%Y-%m-%d') for d in daily['date']],
+        'amounts': daily['amount'].round(2).tolist(),
         'daily': daily['amount'].round(2).tolist(),
     }
 
@@ -393,7 +404,13 @@ def api_response(builder_fn):
 def index():
     return render_template('index.html')
 
+@app.route('/spending-analytics')
+@app.route('/spending')
+def spending_dashboard_page():
+    return render_template('spending_dashboard.html')
+
 @app.route('/dashboard')
+@app.route('/portfolio-analytics')
 def dashboard_page():
     return render_template('dashboard.html')
 

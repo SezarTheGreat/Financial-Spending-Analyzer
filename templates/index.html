@@ -248,9 +248,10 @@
 <nav>
   <a href="/" style="text-decoration:none;"><div class="logo">Fin<span>Wise</span></div></a>
   <div class="nav-links">
-    <span class="nav-pill-badge">✦ Hybrid Quant & AI</span>
+    <span class="nav-pill-badge">✦ Hybrid Quant &amp; AI</span>
     <a href="#features">Features</a>
-    <a href="/dashboard">Direct Dashboard</a>
+    <a href="/spending-analytics">Spending Analytics</a>
+    <a href="/dashboard">Mutual Fund Analytics</a>
     <a href="/about">About</a>
   </div>
 </nav>
@@ -595,7 +596,7 @@ async function submitCsvAnalysis() {
     }
     if (res.ok && data.success) {
       showToast('✓ Transactions loaded!');
-      setTimeout(() => window.location.href = '/dashboard', 600);
+      setTimeout(() => window.location.href = '/spending-analytics', 500);
     } else {
       document.getElementById('csv-loader').style.display = 'none';
       document.getElementById('btn-analyze-csv').disabled = false;
@@ -621,7 +622,7 @@ async function loadSpendingDemo() {
     }
     if (res.ok && data.success) {
       showToast('✓ Sample spending data loaded!');
-      setTimeout(() => window.location.href = '/dashboard', 500);
+      setTimeout(() => window.location.href = '/spending-analytics', 500);
     } else {
       document.getElementById('csv-loader').style.display = 'none';
       showToast('⚠️ ' + (data.error || `Error ${res.status}: Failed to load sample.`));
