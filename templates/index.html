@@ -231,6 +231,62 @@
   }
   .feature-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
 
+  /* ── Disclaimer & Footer ── */
+  .site-footer {
+    max-width: 960px;
+    margin: 50px auto 30px;
+    padding: 0 24px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .disclaimer-card {
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--blush);
+    border-radius: 14px;
+    padding: 16px 20px;
+    text-align: left;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(26,26,46,0.04);
+  }
+  .disclaimer-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .disclaimer-text {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .footer-links a {
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover {
+    color: #BE123C;
+  }
+  .footer-copy {
+    font-size: 0.74rem;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+
   /* toast */
   .toast {
     position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
@@ -386,6 +442,35 @@
     <div class="feature-pill"><div class="dot" style="background:var(--teal)"></div>Google GenAI Advisory</div>
   </div>
 </section>
+
+<!-- ═══════════════════════════════════════════════════ FOOTER & DISCLAIMER -->
+<footer class="site-footer">
+  <div class="disclaimer-card">
+    <div class="disclaimer-title">
+      <span>⚠️</span> Statutory &amp; Educational Project Disclaimer
+    </div>
+    <div class="disclaimer-text">
+      <strong>FinWise is an open-source software engineering portfolio and educational demonstration project.</strong> Nothing contained on this platform—including quantitative metrics (XIRR, rolling alpha, distributor drag), automated AI insights, financial health scores, or spending classifications—constitutes financial, investment, legal, or tax advice. FinWise is <strong>not</strong> a SEBI-registered Investment Adviser (RIA) or Research Analyst (RA). Financial markets and mutual funds are subject to market risks. Users are strongly advised to consult certified <strong>SEBI-registered Investment Advisers (RIA)</strong> and <strong>RBI-regulated financial institutions</strong> before executing any investment or financial decisions.
+    </div>
+  </div>
+
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <span>•</span>
+    <a href="/spending-analytics">Spending Analytics</a>
+    <span>•</span>
+    <a href="/dashboard">Mutual Fund AI</a>
+    <span>•</span>
+    <a href="/about">About &amp; Architecture</a>
+    <span>•</span>
+    <a href="https://github.com/slashthose" target="_blank" rel="noopener">Sakshi Singh Tanwar</a>
+    <span>•</span>
+    <a href="https://github.com/SezarTheGreat" target="_blank" rel="noopener">Sezar (Jyotishman)</a>
+  </div>
+  <div class="footer-copy">
+    © 2026 FinWise — Open Source Portfolio Project for Educational &amp; Research Purposes.
+  </div>
+</footer>
 
 <div class="toast" id="toast"></div>
 

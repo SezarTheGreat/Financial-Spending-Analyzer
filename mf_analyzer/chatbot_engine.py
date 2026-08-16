@@ -20,8 +20,9 @@ from .cas_parser import load_demo_portfolio
 logger = logging.getLogger(__name__)
 
 SEBI_STATUTORY_DISCLAIMER = (
-    "\n\n---\n*Mutual fund investments are subject to market risks. "
-    "Read all scheme-related documents carefully before investing.*"
+    "\n\n---\n*Disclaimer: FinWise is an educational portfolio project. "
+    "Mutual fund investments are subject to market risks. Read all scheme-related documents carefully before investing. "
+    "For personalized investment advice, please consult a certified SEBI-registered Investment Adviser (RIA) or RBI-regulated institution.*"
 )
 
 SYSTEM_ADVISOR_PROMPT = """You are FinWise AI, an institutional Indian Mutual Fund research and analytical engine modeled after Groww G.1.

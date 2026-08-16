@@ -41,6 +41,11 @@ def test_about_page_status_and_content(client):
     assert "https://github.com/SezarTheGreat" in html
     assert "https://www.linkedin.com/in/sezarthegreat/" in html
     
+    # Verify Statutory & Educational Disclaimer
+    assert "Educational &amp; Portfolio Demonstration Disclaimer" in html or "Educational & Portfolio Demonstration Disclaimer" in html
+    assert "SEBI-registered Investment Advisers" in html or "SEBI-registered" in html
+    assert "RBI-regulated" in html
+
     # Verify Favicon links in html
     assert "/static/favicon.svg" in html
 

@@ -65,6 +65,20 @@ def test_spending_dashboard_routes(client):
         assert 'id="healthBars"' in html
         assert 'id="tipsGrid"' in html
 
+        # Statutory & Educational Disclaimer
+        assert "Statutory &amp; Educational Project Disclaimer" in html or "Statutory & Educational Project Disclaimer" in html
+        assert "SEBI-registered" in html
+        assert "RBI-regulated" in html
+
+def test_landing_page_disclaimer(client):
+    """Verify landing page includes statutory & educational disclaimer with SEBI/RBI advice."""
+    res = client.get('/')
+    assert res.status_code == 200
+    html = res.get_data(as_text=True)
+    assert "Statutory &amp; Educational Project Disclaimer" in html or "Statutory & Educational Project Disclaimer" in html
+    assert "SEBI-registered Investment Advisers" in html or "SEBI-registered" in html
+    assert "RBI-regulated financial institutions" in html or "RBI-regulated" in html
+
 def test_spending_static_assets(client):
     """Verify static CSS and JS assets are served properly."""
     css_res = client.get('/static/css/spending_dashboard.css')
