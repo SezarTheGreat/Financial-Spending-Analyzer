@@ -233,6 +233,7 @@
     position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
     background: var(--ink); color: var(--white); border-radius: 12px;
     padding: 12px 24px; font-size: 0.85rem; font-weight: 500;
+    max-width: 90vw; max-height: 120px; overflow: hidden; text-overflow: ellipsis;
     opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999;
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   }
@@ -629,6 +630,15 @@ async function loadSpendingDemo() {
 
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if (!t) return;
+  if (typeof msg === 'string' && msg.includes('<')) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(msg, 'text/html');
+    msg = doc.body.textContent.trim().replace(/\s+/g, ' ');
+  }
+  if (typeof msg === 'string' && msg.length > 160) {
+    msg = msg.substring(0, 160) + '...';
+  }
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3500);
