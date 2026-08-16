@@ -16,7 +16,7 @@ def test_guardrail_sanitizer():
 
 @pytest.mark.asyncio
 async def test_chatbot_edge_case_guaranteed_returns():
-    engine = ChatbotAdvisorEngine()
+    engine = ChatbotAdvisorEngine(api_key="")
     portfolio = load_demo_portfolio()
     quant_engine = QuantEngine()
     diag = await quant_engine.run_diagnostics(portfolio, "Moderate")
@@ -35,7 +35,7 @@ async def test_chatbot_edge_case_guaranteed_returns():
 
 @pytest.mark.asyncio
 async def test_chatbot_edge_case_short_vintage_xirr():
-    engine = ChatbotAdvisorEngine()
+    engine = ChatbotAdvisorEngine(api_key="")
     portfolio = load_demo_portfolio()
     quant_engine = QuantEngine()
     diag = await quant_engine.run_diagnostics(portfolio, "Moderate")
@@ -55,7 +55,7 @@ async def test_chatbot_edge_case_short_vintage_xirr():
 
 @pytest.mark.asyncio
 async def test_chatbot_edge_case_taxation_budget_2024():
-    engine = ChatbotAdvisorEngine()
+    engine = ChatbotAdvisorEngine(api_key="")
     portfolio = load_demo_portfolio()
     quant_engine = QuantEngine()
     diag = await quant_engine.run_diagnostics(portfolio, "Moderate")
@@ -76,7 +76,7 @@ async def test_chatbot_edge_case_taxation_budget_2024():
 
 @pytest.mark.asyncio
 async def test_chatbot_edge_case_debt_taxation_sec_50aa():
-    engine = ChatbotAdvisorEngine()
+    engine = ChatbotAdvisorEngine(api_key="")
     portfolio = load_demo_portfolio()
     quant_engine = QuantEngine()
     diag = await quant_engine.run_diagnostics(portfolio, "Moderate")
@@ -98,7 +98,7 @@ async def test_chatbot_edge_case_debt_taxation_sec_50aa():
 
 @pytest.mark.asyncio
 async def test_chatbot_edge_case_target_nav_and_debt_switch():
-    engine = ChatbotAdvisorEngine()
+    engine = ChatbotAdvisorEngine(api_key="")
     portfolio = load_demo_portfolio()
     quant_engine = QuantEngine()
     diag = await quant_engine.run_diagnostics(portfolio, "Moderate")
@@ -117,7 +117,7 @@ async def test_chatbot_edge_case_target_nav_and_debt_switch():
 
 @pytest.mark.asyncio
 async def test_chatbot_edge_case_small_vs_large_cap_alpha():
-    engine = ChatbotAdvisorEngine()
+    engine = ChatbotAdvisorEngine(api_key="")
     portfolio = load_demo_portfolio()
     quant_engine = QuantEngine()
     diag = await quant_engine.run_diagnostics(portfolio, "Moderate")
@@ -137,7 +137,7 @@ async def test_chatbot_edge_case_small_vs_large_cap_alpha():
 
 @pytest.mark.asyncio
 async def test_chatbot_edge_case_asset_drift_and_rebalance():
-    engine = ChatbotAdvisorEngine()
+    engine = ChatbotAdvisorEngine(api_key="")
     portfolio = load_demo_portfolio()
     quant_engine = QuantEngine()
     diag = await quant_engine.run_diagnostics(portfolio, "Moderate")
@@ -157,7 +157,7 @@ async def test_chatbot_edge_case_asset_drift_and_rebalance():
 
 @pytest.mark.asyncio
 async def test_chatbot_edge_case_stock_overlap_ppfc_bandhan():
-    engine = ChatbotAdvisorEngine()
+    engine = ChatbotAdvisorEngine(api_key="")
     portfolio = load_demo_portfolio()
     quant_engine = QuantEngine()
     diag = await quant_engine.run_diagnostics(portfolio, "Moderate")
@@ -177,7 +177,7 @@ async def test_chatbot_edge_case_stock_overlap_ppfc_bandhan():
 
 @pytest.mark.asyncio
 async def test_chatbot_edge_case_regular_plan_drag():
-    engine = ChatbotAdvisorEngine()
+    engine = ChatbotAdvisorEngine(api_key="")
     portfolio = load_demo_portfolio()
     quant_engine = QuantEngine()
     diag = await quant_engine.run_diagnostics(portfolio, "Moderate")
