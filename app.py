@@ -72,27 +72,12 @@ class WSGIPathNormalizer:
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '/')
-        
-        orig = (
-            environ.get('HTTP_X_MATCHED_PATH')
-            or environ.get('HTTP_X_FORWARDED_PATH')
-            or environ.get('HTTP_X_FORWARDED_URI')
-            or environ.get('RAW_URI')
-            or environ.get('REQUEST_URI')
-        )
-        if orig and not (orig.startswith('/api/index') or orig == '/api'):
-            path = orig.split('?')[0]
-        else:
-            for prefix in ['/api/index.py', '/api/index', '/index.py', '/index']:
-                if path.startswith(prefix):
-                    path = path[len(prefix):]
-                    break
-        
-        if not path or path == '':
-            path = '/'
+        for prefix in ['/api/index.py', '/api/index', '/index.py']:
+            if path.startswith(prefix):
+                path = path[len(prefix):] or '/'
+                break
         if not path.startswith('/'):
             path = '/' + path
-
         environ['PATH_INFO'] = path
         return self.wsgi_app(environ, start_response)
 
