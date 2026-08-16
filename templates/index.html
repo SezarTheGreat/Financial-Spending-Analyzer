@@ -503,12 +503,12 @@ async function submitMfAnalysis() {
       body: fd,
     });
     
+    const rawText = await res.text();
     let data = {};
     try {
-      data = await res.json();
+      data = JSON.parse(rawText);
     } catch (e) {
-      const txt = await res.text();
-      data = { detail: txt || `Server responded with status ${res.status}` };
+      data = { detail: rawText || `Server responded with status ${res.status}` };
     }
 
     if (res.ok) {
@@ -544,12 +544,12 @@ async function loadMfDemo() {
       body: fd,
     });
     
+    const rawText = await res.text();
     let data = {};
     try {
-      data = await res.json();
+      data = JSON.parse(rawText);
     } catch (e) {
-      const txt = await res.text();
-      data = { detail: txt || `Server responded with status ${res.status}` };
+      data = { detail: rawText || `Server responded with status ${res.status}` };
     }
 
     if (res.ok) {
@@ -581,12 +581,12 @@ async function submitCsvAnalysis() {
 
   try {
     const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    const rawText = await res.text();
     let data = {};
     try {
-      data = await res.json();
+      data = JSON.parse(rawText);
     } catch (e) {
-      const txt = await res.text();
-      data = { error: txt || `Server returned ${res.status}` };
+      data = { error: rawText || `Server returned ${res.status}` };
     }
     if (res.ok && data.success) {
       showToast('✓ Transactions loaded!');
@@ -607,12 +607,12 @@ async function loadSpendingDemo() {
   document.getElementById('csv-loader').style.display = 'flex';
   try {
     const res = await fetch('/api/sample');
+    const rawText = await res.text();
     let data = {};
     try {
-      data = await res.json();
+      data = JSON.parse(rawText);
     } catch (e) {
-      const txt = await res.text();
-      data = { error: txt || `Server returned ${res.status}` };
+      data = { error: rawText || `Server returned ${res.status}` };
     }
     if (res.ok && data.success) {
       showToast('✓ Sample spending data loaded!');
