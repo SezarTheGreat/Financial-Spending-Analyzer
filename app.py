@@ -10,6 +10,9 @@ import asyncio
 from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
+from dotenv import load_dotenv
+
+load_dotenv()
 import math
 import traceback
 import io
