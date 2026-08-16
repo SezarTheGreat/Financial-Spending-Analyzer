@@ -1,4 +1,4 @@
-# 💰 FinWise — Financial Spending Analyzer & AI Mutual Fund Advisor
+# 💰 FinWise — Personal Finance Spending & Mutual Fund AI Portfolio Analyzer
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20App-brightgreen?style=for-the-badge)](https://financial-spending-analyzer-ioyg.vercel.app/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)](https://www.python.org/)
@@ -8,51 +8,229 @@
 
 ---
 
-## 📌 Executive Summary
+## 📌 Overview
+ 
+Managing personal finances gets hard once hundreds of transactions pile up. Most people know how much they earn but have little visibility into where it actually goes.
+ 
+The **Personal Finance Spending Analyzer** turns raw transaction data into meaningful financial insight. It cleans, categorizes, stores, analyzes, and visualizes financial transactions to help users understand their spending habits and overall financial health — going beyond basic expense tracking with an automated Financial Health Score, statistical anomaly detection, and budget recommendations based on historical patterns.
+ 
+An interactive dashboard lets users explore their financial data directly in the browser, backed by a persistent PostgreSQL database (via Supabase) so uploaded data isn't lost between sessions.
 
-**FinWise** is an institutional-grade, full-stack personal finance and portfolio intelligence platform. It bridges the gap between daily bank transaction analytics and long-term mutual fund wealth management by combining:
+In addition to bank transaction intelligence, the platform now features **FinWise Mutual Fund Portfolio Intelligence & AI Advisor**, delivering institutional-grade CAS portfolio audits, cashflow-level Newton-Raphson XIRR solvers, 4-tier rolling return form ratings, distributor expense drag simulations, stock overlap matrices, and an interactive Gemini-powered conversational advisor with dynamic Chart.js generation.
+ 
+---
 
-1. **Personal Spending Analytics**: Ingests, categorizes, cleans, and visualizes bank transactions with statistical two-tailed Gaussian anomaly detection ($Z > 2.0$), savings rate tracking, calendar heatmaps, and rule-based spending health scores.
-2. **Mutual Fund Quantitative Engine**: Parses CAMS / KFintech Consolidated Account Statements (CAS PDFs, CSVs, Excel), executes cashflow-level Newton-Raphson XIRR solvers, performs 4-tier rolling return form and alpha attribution, models pairwise weighted portfolio overlap, and calculates asset allocation drift.
-3. **FinWise Conversational AI Advisor**: An intelligent, multi-turn AI assistant powered by Google Gemini (with an autonomous deterministic heuristic fallback engine). It delivers real-time portfolio advice, generates interactive Chart.js artifacts directly inside conversation streams, computes post-Budget 2024 capital gains tax obligations, and verifies SEBI Scheme Information Document (SID) exit loads.
+## 🎯 Project Objectives
+ 
+- Analyze personal transaction data effectively
+- Understand spending behavior across categories
+- Identify areas where expenses can be reduced
+- Track savings and financial performance over time
+- Detect unusually large or suspicious expenses
+- Generate meaningful financial insights automatically
+- Persist user data reliably across sessions via a real database
+- Provide a user-friendly analytics dashboard for decision-making
+- Audit Consolidated Account Statements (CAS PDFs, Excel, CSV) for Indian Mutual Funds
+- Evaluate portfolio performance using exact Newton-Raphson XIRR with short-vintage linearization guards
+- Benchmark scheme performance using 4-tier rolling form and active alpha attribution
+- Detect redundant equity diversification using pairwise weighted stock overlap matrices
+- Calculate distributor commission drag (Direct vs Regular plans) over 5, 10, and 20-year horizons
+- Provide real-time conversational AI financial advisory with Budget 2024 statutory tax calculations and SEBI SID exit load validations
 
 ---
 
-## 🌟 Core Feature Suite
+## 📂 Dataset Description
+ 
+Transactions are uploaded via CSV and persisted to a PostgreSQL database (Supabase), with the following core fields:
+ 
+| Column | Description |
+|---|---|
+| Date | Transaction date |
+| Description | Transaction description or merchant |
+| Amount | Transaction amount (positive for income, negative for expenses) |
+| Month | Month extracted from transaction date |
+| Year | Year extracted from transaction date |
+| Day | Day of the week extracted from transaction date |
+| Category | Expense category assigned through categorization rules |
+ 
+**Sample Data**
+ 
+| Date | Description | Amount | Category |
+|---|---|---|---|
+| 2026-04-01 | Salary | 38751 | Income |
+| 2026-04-02 | Electricity Bill | -2311 | Household |
+| 2026-04-03 | Uber | -348 | Transport |
+| 2026-04-04 | Amazon | -2096 | Shopping |
+ 
+---
 
-### 1. 💳 Bank Spending & Cashflow Intelligence
-* **Flexible Ingestion & Normalization**: Universal CSV parser supporting various bank statement formats (HDFC, ICICI, SBI, Axis, etc.) with automatic column mapping, deduplication, and datetime standardization.
-* **Cashflow KPI Dashboard**: Instant summary of Total Inflow, Total Outflow, Net Savings, and Savings Rate percentage.
-* **Spending Breakdown & Trends**: Interactive category-wise distributions, monthly income vs. expense comparisons, and spending velocity trends.
-* **Weekly & Calendar Heatmaps**: Visual day-of-week and month-by-month transaction intensity heatmaps to spot cyclical spending habits.
-* **Statistical Anomaly Detection**: Flags unusual transactions using two-tailed Gaussian Z-score outlier detection ($Z = (x - \mu) / \sigma > 2.0$) categorized by risk level.
-* **Automated Financial Health Score (0–100)**: Evaluates spending discipline across savings rate, expense consistency, and category concentration.
-* **Transaction Ledger**: Searchable, sortable, and paginated transaction history with category filtering.
+## ⚙️ Core Project Workflow
+
+### 1. Bank Spending Analytics Workflow
+ 
+**1. Data Collection**  
+Transactions are uploaded as CSV through the dashboard and written to a PostgreSQL database hosted on Supabase, replacing the earlier local-CSV-only flow.
+ 
+**2. Data Cleaning**  
+- Removing duplicate records  
+- Handling missing values  
+- Converting date fields into datetime format  
+- Validating transaction amounts before persisting to the database  
+
+**3. Feature Engineering**  
+- Month, Year, Day of Week extracted from transaction dates  
+- Expense categories assigned based on transaction descriptions  
+  
+**4. Exploratory Data Analysis (EDA)**  
+- Income patterns  
+- Expense distribution  
+- Category-wise spending  
+- Monthly spending trends  
+- Savings trends  
+- Spending concentration  
+  
+**5. Financial Health Evaluation**  
+A custom Financial Health Score (0-100) built from:  
+- Savings Rate  
+- Expense Stability  
+- Spending Behavior Metrics  
+  
+**6. Automated Insights Generation**  
+Rule-based logic identifies:  
+- Highest / lowest spending category  
+- Best / worst savings month  
+- Spending warnings  
+- Budget recommendations  
+  
+**7. Anomaly Detection**  
+Statistical methods (e.g. deviation from category-wise spending norms) flag unusually large transactions that may indicate overspending, unexpected purchases, or irregularities.
+ 
+**8. Dashboard Development**  
+An interactive dashboard presents all insights visually, reading live from the Postgres database.
 
 ---
 
-### 2. 📊 Mutual Fund Portfolio Analyzer & Quant Engine
-* **CAS Parser (CAMS & KFintech)**: Parses standard Consolidated Account Statements (PDF with password support, Excel, and CSV) to extract scheme holdings, folios, units, purchase NAV, and current valuation.
-* **Portfolio XIRR (Newton-Raphson)**: Precision cashflow solver with short-vintage holding (<180 days) compounding distortion linearization guards to prevent exaggerated annualized returns.
-* **4-Tier Rolling Form & Active Alpha**: Classifies schemes into `In-Form`, `On-Track`, `Off-Track`, and `Out-of-Form` by benchmarking 1-year and 3-year rolling performance ($\alpha_{1Y}, \alpha_{3Y}$) against category Total Return Indices (TRI).
-* **Direct vs. Regular Expense Drag Calculator**: Models cumulative wealth erosion and fee leakage over 5, 10, and 20-year horizons caused by distributor commissions (default 0.85% expense differential).
-* **Pairwise Stock Overlap Matrix**: Calculates exact weighted underlying stock overlaps $\sum \min(w_{A,k}, w_{B,k})$ across schemes to eliminate redundant diversification.
-* **Multi-Asset Allocation & Drift Blueprint**: Decomposes hybrid holdings into Equity, Debt, and Commodities, evaluates drift against user risk profiles (Conservative, Moderate, Aggressive), and generates a 3-step SIP rebalancing roadmap.
-* **Real Estate (REIT) & Geographic Exposure Audit**: Verifies real estate exposure and isolates foreign/global technology allocations without keyword false-positives.
-* **Calibrated Portfolio Health Score (0–100)**: Mathematical scoring calibrated with continuous proportional risk drift, asset allocation alignment, and quantitative drag penalties.
+### 2. Mutual Fund Portfolio Intelligence & AI Workflow *(Jyotishman's Architecture)*
+
+**1. CAS Statement Parsing & Decryption**  
+Ingests CAMS and KFintech Consolidated Account Statements (CAS PDFs, Excel, CSV) in-memory with password decryption, extracting scheme names, folios, units, purchase NAVs, and valuations.
+
+**2. Cashflow XIRR & Compounding Linearization**  
+Executes Newton-Raphson cashflow solvers with short-vintage holding (<180 days) linearization guards to prevent exaggerated annualized CAGR distortions.
+
+**3. 4-Tier Rolling Form & Active Alpha Attribution**  
+Classifies schemes into `In-Form`, `On-Track`, `Off-Track`, and `Out-of-Form` by benchmarking 1-year and 3-year rolling performance ($\alpha_{1Y}, \alpha_{3Y}$) against AMFI category Total Return Indices (TRI).
+
+**4. Direct vs. Regular Commission Drag Simulation**  
+Calculates cumulative wealth loss and intermediary fee leakage over 5, 10, and 20-year horizons based on historical expense ratio differentials (0.85%).
+
+**5. Pairwise Weighted Stock Overlap & Concentration**  
+Computes exact pairwise stock overlap $\sum \min(w_{A,k}, w_{B,k})$ across equity schemes to highlight portfolio duplication and stock concentration risk.
+
+**6. Multi-Asset Allocation & 3-Step SIP Rebalancing Blueprint**  
+Decomposes holdings into Equity, Debt, and Commodities, determines drift against user risk profiles (Conservative, Moderate, Aggressive), and outlines a 3-step SIP rebalancing glidepath.
+
+**7. FinWise Conversational AI Advisor & Dynamic Chart Generation**  
+Provides multi-turn AI advisory powered by Google Gemini (with an instant deterministic fallback engine), rendering interactive Chart.js artifacts (Line, Bar, Doughnut), computing Budget 2024 capital gains tax liabilities (Section 112A equity LTCG at 12.5%, Section 111A STCG at 20.0%, Section 50AA debt fund taxation), and verifying SEBI SID exit load schedules.
 
 ---
 
-### 3. 🤖 FinWise Conversational AI Advisor
-* **Multi-Turn Advisory**: Natural language financial analysis across both mutual fund holdings and bank spending data.
-* **Embedded Chart Generation**: Generates live Chart.js artifacts (Line, Bar, Doughnut) inside chat streams with automated Cartesian scale normalization.
-* **Statutory Tax Engine (Budget 2024)**:
-  * **Section 112A (Equity LTCG)**: 12.5% on gains exceeding the ₹1.25 Lakh annual exemption (holding period > 12 months).
-  * **Section 111A (Equity STCG)**: 20.0% flat tax on short-term holdings.
-  * **Section 50AA (Specified Debt Funds)**: Taxed at marginal income tax slab rates without indexation for investments made after April 1, 2023.
-* **SEBI SID Compliance & Exit Load Verification**: Accurately advises on fund-specific exit loads (e.g., SBI Ultra Short Duration 0.00% NIL, Parag Parikh Flexi Cap tiered 2%/1%/NIL exit loads, Bandhan Small Cap 1% < 1 year).
-* **Deterministic Fallback & Fast-Fail Architecture**: Resilient dual-layer query router that provides instant heuristic responses when external AI APIs encounter `429 RESOURCE_EXHAUSTED` rate limits.
-* **Sequential Markdown & Math Engine**: Formats outputs with continuous numbered lists across sub-bullets and isolated KaTeX math rendering.
+## 📊 Exploratory Data Analysis
+
+The project includes several analytical visualizations:
+
+### Transaction Distribution Analysis
+* Distribution of transaction amounts
+* Identification of common spending ranges
+
+### Category Analysis
+* Total spending by category
+* Average transaction value per category
+* Category frequency distribution
+
+### Time-Series Analysis
+* Monthly spending trends
+* Monthly income trends
+* Savings trends over time
+
+### Spending Composition
+* Category spending breakdown
+* Percentage contribution of each category
+
+### Heatmap Analysis
+* Monthly spending intensity across categories
+* Seasonal spending behavior
+
+### Correlation Analysis
+* Relationships between numerical financial metrics
+
+---
+
+## 🏥 Financial Health Score
+
+One of the unique features of this project is the Financial Health Score.
+
+The score combines multiple financial indicators into a single metric ranging from 0 to 100.
+
+### Factors Considered
+* Savings Rate
+* Expense Consistency
+* Category Spending Distribution
+
+### Score Interpretation
+
+| Score Range | Financial Status  |
+| ----------- | ----------------- |
+| 80 - 100    | Excellent         |
+| 60 - 79     | Good              |
+| 40 - 59     | Average           |
+| Below 40    | Needs Improvement |
+
+This metric provides a quick overview of a user's financial condition.
+
+---
+
+## 🚨 Anomaly Detection
+
+The project uses statistical techniques to identify unusually large expenses.
+
+Examples include:
+* Unexpected purchases
+* Excessive spending events
+* Transactions significantly different from normal behavior ($Z = (x - \mu) / \sigma > 2.0$)
+
+This feature helps users recognize financial outliers that may require attention.
+
+---
+
+## 💡 Smart Insights
+
+The analyzer automatically generates insights such as:
+* Highest spending category
+* Monthly savings performance
+* Expense trends
+* Overspending alerts
+* Budget optimization suggestions
+* Financial health recommendations
+
+---
+
+## 📈 Dashboard Modules
+
+* **Overview**: Total Inflow, Total Outflow, Net Savings, and Savings Rate KPI cards
+* **Income vs Expense**: Monthly cashflow timeseries comparison
+* **Monthly Overview**: Category-wise monthly expenditure matrix
+* **Category Analysis**: Expenditure breakdown and interactive doughnut charts
+* **Spending Trends**: Spending velocity and historical trends
+* **Weekly Breakdown**: Day-of-week spending distributions
+* **Calendar Heatmap**: Visual daily spending intensity map
+* **Anomaly Detection**: Two-tailed Gaussian Z-score outlier alerts
+* **Financial Health Score**: Composite scoring gauge with factor breakdowns
+* **Transaction History**: Paginated, searchable, and filtered transaction ledger
+* **MF Portfolio Overview**: Valuation, gains, cashflow XIRR, and asset allocation
+* **Holdings & Rolling Form**: 4-tier rolling CAGR ratings and active alpha attribution
+* **Stock Overlap Matrix**: Pairwise scheme common stock overlap matrix
+* **AI Advisor & Chatbot**: Conversational portfolio advisory with dynamic Chart.js artifacts
 
 ---
 
@@ -109,69 +287,6 @@ flowchart TD
 
 ---
 
-## 🛠️ Technology Stack
-
-| Layer | Technologies |
-|---|---|
-| **Backend & APIs** | Python 3.10+, Flask 3.0, Pydantic v2, PyXIRR, HTTPX, Aiohttp |
-| **Data & Quant Analytics** | Pandas, NumPy, Scikit-Learn, Casparser, PyPDF, OpenPyXL |
-| **Artificial Intelligence** | Google Gemini 1.5/2.0 (`google-genai`), Instructor, Regex Rule-Engine |
-| **Database & Persistence** | PostgreSQL (Supabase), Local CSV Fallback Engine |
-| **Frontend & UI** | Semantic HTML5, Vanilla CSS3 (Custom Design System), JavaScript (ES6+), Chart.js, KaTeX |
-| **Infrastructure & Cloud** | Vercel Serverless Functions, Cloudflare R2 / S3 Storage |
-| **Testing & CI** | Pytest, Adversarial Quant Test Harness, Automated Prompt E2E Suite |
-
----
-
-## 📂 Repository Structure
-
-```text
-Financial-Spending-Analyzer/
-├── api/
-│   └── index.py               # Vercel serverless WSGI entrypoint
-├── app.py                     # Main Flask web application & REST API routes
-├── core/                      # Application configuration, Gemini client, & query router
-├── db/                        # Database adapters, session management, & migrations
-├── ingestion/                 # Bank statement CSV ingestion & schema validators
-├── mcp_servers/               # MCP tools for CAS synchronization & chart sandboxing
-│   ├── cas_sync/
-│   └── chart_sandbox/
-├── mf_analyzer/               # Institutional Mutual Fund Analysis Suite
-│   ├── ai_engine.py           # LLM advisor synthesis & prompt engineering
-│   ├── cas_parser.py          # CAMS / KFintech PDF & Excel statement parser
-│   ├── chatbot_engine.py      # Dual-mode AI chatbot, heuristics & tax rules
-│   ├── market_data.py         # AMFI NAV client & historical data cache
-│   ├── quant_engine.py        # Newton-Raphson XIRR, overlap & rolling alpha math
-│   ├── rules.py               # SEBI compliance, exit loads, & tax schedules
-│   └── schemas.py             # Pydantic models for portfolios and audit responses
-├── quant_service/             # Dedicated quantitative microservice modules
-├── static/
-│   ├── css/
-│   │   ├── dashboard.css      # Dashboard styling & responsive layout
-│   │   └── style.css          # Core styles & design tokens
-│   ├── js/
-│   │   ├── app.js             # Spending dashboard interactions
-│   │   └── dashboard.js       # Chart.js bindings, chat streaming & markdown parser
-│   └── favicon.svg            # FinWise application favicon
-├── supabase/                  # Supabase schema definitions & migration scripts
-├── templates/
-│   ├── about.html             # Architecture & contributor attribution page
-│   ├── dashboard.html         # Unified single-page application (Spending + MF)
-│   └── index.html             # Landing page
-├── tests/                     # Comprehensive test suite
-│   ├── test_all_user_prompts.py # 100% Institutional prompt verification
-│   ├── test_chatbot_api.py      # Multi-turn chat & chart contract tests
-│   ├── test_quant_engine.py     # Math, XIRR, and overlap assertions
-│   └── test_adversarial_quant.py# Extreme-case & adversarial quant tests
-├── transactions.csv           # Default sample bank transactions dataset
-├── vercel.json                # Vercel serverless routing & header rules
-├── requirements.txt           # Production Python dependencies
-├── pytest.ini                 # Pytest configuration
-└── README.md                  # Project documentation
-```
-
----
-
 ## 📡 REST API Specification
 
 ### Spending & Cashflow Endpoints
@@ -179,105 +294,134 @@ Financial-Spending-Analyzer/
 | Endpoint | Method | Description |
 |---|---|---|
 | `/api/upload` | `POST` | Upload and normalize a bank transaction CSV |
-| `/api/sample` | `GET` | Load the default sample transaction dataset |
-| `/api/overview` | `GET` | Retrieve total income, total expense, savings, and savings rate |
-| `/api/categories` | `GET` | Aggregate total expenditure and transaction count by category |
-| `/api/income-expense` | `GET` | Retrieve monthly inflow vs. outflow timeseries data |
-| `/api/monthly` | `GET` | Category-wise monthly expenditure matrix |
-| `/api/weekly` | `GET` | Day-of-week and week-number spending distributions |
+| `/api/sample` | `GET` | Load default sample transaction dataset |
+| `/api/overview` | `GET` | Retrieve total income, total expenses, net savings, and savings rate |
+| `/api/categories` | `GET` | Category-wise expense aggregation and transaction counts |
+| `/api/income-expense` | `GET` | Monthly income vs. expense comparison series |
+| `/api/monthly` | `GET` | Monthly category expenditure matrix |
+| `/api/weekly` | `GET` | Weekly spending patterns and weekday distribution |
 | `/api/trends` | `GET` | Category spending trends over time |
 | `/api/anomalies` | `GET` | Statistical two-tailed Gaussian Z-score outlier transactions |
-| `/api/calendar` | `GET` | Daily expenditure intensity map for calendar heatmap rendering |
+| `/api/calendar` | `GET` | Daily expenditure intensity map for calendar heatmap |
 | `/api/health` | `GET` | Financial Health Score (0-100) and breakdown metrics |
 | `/api/insights` | `GET` | Rule-based budget recommendations and spending warnings |
 | `/api/transactions` | `GET` | Paginated, searchable, and filtered transaction records |
 
----
-
-### Mutual Fund & Quant Endpoints
+### Mutual Fund & AI Endpoints
 
 | Endpoint | Method | Description |
 |---|---|---|
 | `/api/portfolio/health` | `GET` | Check mutual fund engine and database connectivity |
-| `/api/portfolio/analyze-cas` | `POST` | Upload and parse CAMS/KFintech CAS PDF (with optional password) |
-| `/api/portfolio/analyze-demo` | `POST` | Load and audit the institutional demo portfolio |
-| `/api/portfolio/re-evaluate-risk` | `POST` | Recalculate portfolio health score and asset drift for a new risk profile |
+| `/api/portfolio/analyze-cas` | `POST` | Parse and audit CAMS/KFintech CAS statement PDF (with optional password) |
+| `/api/portfolio/analyze-demo` | `POST` | Load and audit the institutional demo mutual fund portfolio |
+| `/api/portfolio/re-evaluate-risk` | `POST` | Recalculate portfolio health score and asset drift for a target risk profile |
+| `/api/chat` | `POST` | Multi-turn conversational AI advisor with dynamic Chart.js generation |
 
 ---
 
-### FinWise AI Chatbot Endpoint
+## 📸 Visual Showcase & Screenshots
 
-#### `POST /api/chat`
+### 1. Bank Spending Analytics *(Original Core Features)*
 
-Handles conversational financial queries across spending and investment domains.
+#### Landing Page
+![Landing Page](assets/LandingPage.png)
 
-**Request Schema:**
-```json
-{
-  "message": "What is my portfolio XIRR and how does it compare to benchmark?",
-  "session_id": "optional-uuid-v4",
-  "audit_id": "optional-audit-uuid",
-  "history": [
-    { "role": "user", "content": "Hello" },
-    { "role": "assistant", "content": "How can I help you analyze your finances today?" }
-  ],
-  "risk_profile": "Moderate"
-}
-```
+----
 
-**Response Schema:**
-```json
-{
-  "reply": "Your portfolio XIRR stands at **16.42%**...",
-  "chart": {
-    "type": "line",
-    "title": "Portfolio Cashflow vs Cumulative Valuation",
-    "data": {
-      "labels": ["Apr 2024", "Jul 2024", "Oct 2024", "Jan 2025"],
-      "datasets": [
-        {
-          "label": "Net Invested (₹)",
-          "data": [100000, 250000, 400000, 550000],
-          "borderColor": "#F4A7B9",
-          "backgroundColor": "rgba(244, 167, 185, 0.1)"
-        }
-      ]
-    }
-  },
-  "session_id": "uuid-v4",
-  "risk_profile": "Moderate"
-}
-```
+#### Dashboard Overview
+![Dashboard](assets/Dashboard.png)
+
+----
+
+#### Financial Health Score & Spending Anomalies
+![Health Score](assets/HealthScore.png)
 
 ---
 
-## 🚀 Local Installation & Setup
+### 2. Mutual Fund Portfolio Intelligence & AI Advisor *(Jyotishman's Extended Features)*
 
-### 1. Prerequisites
-* Python 3.10 or higher
-* Git
-* Supabase Account (optional for local CSV mode, recommended for cloud persistence)
-* Google Gemini API Key (optional, deterministic fallback will activate if absent)
+#### Portfolio Overview, XIRR & Risk Drift
+![MF Portfolio Audit](assets/MFPortfolioAudit.png)
+
+----
+
+#### Pairwise Stock Overlap Matrix & Concentration Analysis
+![Stock Overlap Matrix](assets/StockOverlap.png)
+
+----
+
+#### Holdings Breakdown & 4-Tier Rolling Return Form Ratings
+![Holdings & Rolling Form](assets/HoldingsRollingForm.png)
+
+----
+
+#### FinWise AI Conversational Advisor with Dynamic Chart Artifacts
+![AI Chatbot Advisor](assets/AIChatbotAdvisor.png)
+
+----
+
+#### System Architecture & Contributor Attribution
+![Architecture & About](assets/ArchitectureAbout.png)
 
 ---
 
-### 2. Clone the Repository
+## 🛠️ Technology Stack
+
+### Backend & Analytics
+* **Python 3.10+**
+* **Flask 3.0** (with `WSGIPathNormalizer` for serverless compatibility)
+* **Pandas & NumPy** (Data cleaning, wrangling, time-series aggregations)
+* **PyXIRR & Casparser** (Newton-Raphson XIRR solving, CAS PDF parsing)
+* **Scikit-Learn** (Gaussian Z-score outlier detection)
+* **Pydantic v2** (Strict data schema validation)
+
+### Artificial Intelligence & Advisory
+* **Google Gemini 1.5/2.0 (`google-genai`)**
+* **Instructor & Structured Outputs**
+* **Deterministic Heuristic Rule Engine** (Instant fallback on 429 rate limits)
+
+### Database & Storage
+* **PostgreSQL (Supabase)** (Persistent transaction & portfolio audit storage)
+* **Local CSV / Memory Fallback**
+
+### Frontend & UI
+* **HTML5 & Vanilla CSS3** (Custom responsive design system, zero bloated UI libraries)
+* **JavaScript (ES6+)**
+* **Chart.js** (Dynamic line, bar, and doughnut charts)
+* **KaTeX** (Mathematical formula rendering)
+
+### Development & Deployment
+* **Vercel Serverless Functions**
+* **Git & GitHub**
+* **Pytest Test Suite**
+
+---
+
+# 🚀 Running the Project Locally
+
+## 1. Clone the repository
+
 ```bash
 git clone https://github.com/SezarTheGreat/Financial-Spending-Analyzer.git
+```
+
+```bash
 cd Financial-Spending-Analyzer
 ```
 
 ---
 
-### 3. Create & Activate a Virtual Environment
+## 2. Create a virtual environment
 
-**Windows (PowerShell):**
+### Windows (PowerShell)
+
 ```powershell
 python -m venv venv
 venv\Scripts\activate
 ```
 
-**macOS / Linux:**
+### macOS / Linux
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
@@ -285,116 +429,106 @@ source venv/bin/activate
 
 ---
 
-### 4. Install Dependencies
+## 3. Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-### 5. Configure Environment Variables
-Create a `.env` file in the project root based on `.env.example`:
+## 4. Configure Environment Variables (Optional)
+Create a `.env` file in the root directory:
 
 ```ini
-# Gemini LLM API Key (Optional)
+# Gemini LLM API Key (Optional: deterministic fallback operates if omitted)
 GEMINI_API_KEY="your-gemini-api-key"
 
-# Supabase Cloud Database (Optional)
+# Supabase Cloud Database (Optional: local fallback operates if omitted)
 SUPABASE_URL="https://your-project.supabase.co"
 SUPABASE_ANON_KEY="your-supabase-anon-key"
 SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
-
-# Cloudflare R2 / S3 Storage (Optional)
-R2_BUCKET_NAME="mutual-fund-lancedb"
-R2_ACCOUNT_ID="your-r2-account-id"
-R2_ACCESS_KEY_ID="your-r2-access-key-id"
-R2_SECRET_ACCESS_KEY="your-r2-secret-access-key"
-R2_ENDPOINT="https://your-r2-account-id.r2.cloudflarestorage.com"
 ```
 
 ---
 
-### 6. Run the Application
+## 5. Start the Flask server
+
 ```bash
 python app.py
 ```
 
-Access the interface in your browser:
+---
+
+## 6. Open your browser
+
+Visit:
 * **Landing Page**: `http://127.0.0.1:5000/`
 * **Unified Dashboard**: `http://127.0.0.1:5000/dashboard`
 * **Architecture & About**: `http://127.0.0.1:5000/about`
 
 ---
 
+# 📁 Supported CSV Format
+
+Your CSV should contain transaction records with columns similar to:
+
+| Date       | Description   | Category      | Type    | Amount |
+| ---------- | ------------- | ------------- | ------- | ------ |
+| 2026-04-01 | Salary Credit | Income        | Income  | 45000  |
+| 2026-04-02 | House Rent    | Housing       | Expense | 14000  |
+| 2026-04-03 | Swiggy        | Food & Dining | Expense | 520    |
+
+The application automatically normalizes many common CSV formats, including different column names for dates, descriptions, and amounts.
+
+---
+
 ## 🧪 Testing & Verification
 
-The repository contains an automated end-to-end and unit testing suite covering quantitative calculations, tax schedules, prompt handling, and edge cases.
+To run the automated test suite:
 
-To run all tests:
 ```bash
 pytest
 ```
 
-To run individual test modules:
-```bash
-# Test all institutional AI chatbot prompts & charts
-pytest tests/test_all_user_prompts.py -v
+---
 
-# Test quantitative financial math (XIRR, Overlap, Drag)
-pytest tests/test_quant_engine.py -v
+## 🎓 Skills Demonstrated
 
-# Test adversarial edge cases and error bounds
-pytest tests/test_adversarial_quant.py -v
-```
+This project demonstrates practical experience in:
+
+* Data Cleaning & Wrangling
+* Feature Engineering & Time-Series Modeling
+* Exploratory Data Analysis (EDA)
+* Statistical Anomaly Detection (Gaussian Z-scores)
+* Financial Mathematics (Newton-Raphson XIRR, Rolling Returns, Alpha Attribution)
+* Portfolio Optimization (Overlap Matrix, Asset Drift, Fee Drag Simulation)
+* Conversational AI & LLM Structured Tool Calling
+* Full-Stack Web & Dashboard Development
+* Cloud Database Persistence & Serverless Deployment
 
 ---
 
-## 📸 Visual Showcase & Screenshots
+## 👥 Contributors & Attribution
 
-### 1. Landing Page & Dual Ingestion Gateway
-Unified entrypoint featuring dual-pipeline support for CAS statement PDFs (with password decryption) and bank transaction CSVs.
+* **Sakshi Singh Tanwar** ([@slashthose](https://github.com/slashthose))
+  * **Role**: Original Creator & Core Foundation
+  * **Contributions**: Designed and engineered the core **Financial Spending Analyzer** framework. Built the end-to-end bank statement parsing pipelines, category classification engine, expense trend heuristics, and statistical spending anomaly detection algorithms.
+  * **Original Repository**: [slashthose/Financial-Spending-Analyzer](https://github.com/slashthose/Financial-Spending-Analyzer)
 
-![Landing Page](assets/LandingPage.png)
-
----
-
-### 2. Mutual Fund Portfolio Intelligence & Quant Engine
-Comprehensive cashflow-level analytics, Newton-Raphson XIRR, distributor regular plan drag calculator, and risk drift evaluation.
-
-| Portfolio Overview & Risk Drift | Pairwise Stock Overlap Matrix |
-|:---:|:---:|
-| ![MF Portfolio Audit](assets/MFPortfolioAudit.png) | ![Stock Overlap Matrix](assets/StockOverlap.png) |
-
-| Holdings & 4-Tier Rolling Return Form | FinWise AI Conversational Advisor |
-|:---:|:---:|
-| ![Holdings & Rolling Form](assets/HoldingsRollingForm.png) | ![AI Chatbot Advisor](assets/AIChatbotAdvisor.png) |
+* **Jyotishman Barman** ([@SezarTheGreat](https://github.com/SezarTheGreat))
+  * **Role**: Mutual Fund AI & Quantitative Architecture Contributor
+  * **Contributions**: Architected and implemented the **Mutual Fund Intelligence Layer**, CAMS/KFintech CAS statement parsing, Newton-Raphson XIRR cashflow engine, 4-tier rolling form rating, stock overlap matrix, Budget 2024 taxation engine, interactive FinWise AI Chatbot advisor with dynamic Chart.js generation, Supabase PostgreSQL persistence, and Vercel serverless integration.
+  * **Extended Repository**: [SezarTheGreat/Financial-Spending-Analyzer](https://github.com/SezarTheGreat/Financial-Spending-Analyzer)
 
 ---
 
-### 3. Bank Spending & Cashflow Analytics
-Real-time income vs. expense tracking, category breakdowns, savings rate tracking, and two-tailed Gaussian anomaly detection ($Z > 2.0$).
+## 🏆 Key Takeaways
 
-| Spending Analytics Dashboard | Spending Anomalies & Health Score |
-|:---:|:---:|
-| ![Spending Dashboard](assets/Dashboard.png) | ![Spending Anomalies & Health Score](assets/SpendingAnomalies.png) |
+This project showcases how data science, quantitative analytics, and artificial intelligence can be combined into a unified personal wealth management platform. By transforming raw transaction data and mutual fund statements into actionable intelligence, the analyzer empowers users to gain complete clarity over their spending behavior and optimize long-term portfolio returns.
 
 ---
 
-### 4. System Architecture & Technical Attribution
-Tri-hybrid RAG design, quant engine architecture, and complete tech stack breakdown.
-
-![Architecture & About](assets/ArchitectureAbout.png)
-
----
-
-## 👤 Contributor & Attribution
-
-* **Lead Architect & Developer**: [Jyotiraditya Mahanta](https://github.com/SezarTheGreat)
-* **Project**: FinWise AI & Financial Spending Analyzer
-* **Live Deployment**: [financial-spending-analyzer-ioyg.vercel.app](https://financial-spending-analyzer-ioyg.vercel.app/)
-
----
-
-## 📄 License
+# 📄 License
 
 This project is open source and available under the **MIT License**. Distributed for educational and portfolio demonstration purposes.
