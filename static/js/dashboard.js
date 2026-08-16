@@ -17,6 +17,29 @@ function destroyChart(id) {
   if (_charts[id]) { _charts[id].destroy(); delete _charts[id]; }
 }
 
+// ── Right Sidebar Toggle (Open/Close Drawer) ─────────────────────
+function toggleRightSidebar() {
+  const isCollapsed = document.body.classList.toggle('right-sidebar-collapsed');
+  localStorage.setItem('finwise_rs_collapsed', isCollapsed ? '1' : '0');
+  const btn = document.getElementById('btnToggleRightSidebar');
+  if (btn) {
+    btn.classList.toggle('panel-closed', isCollapsed);
+    btn.setAttribute('title', isCollapsed ? 'Open Quick Intelligence Panel' : 'Collapse Quick Intelligence Panel');
+  }
+}
+
+function initRightSidebarState() {
+  const savedState = localStorage.getItem('finwise_rs_collapsed');
+  if (savedState === '1') {
+    document.body.classList.add('right-sidebar-collapsed');
+    const btn = document.getElementById('btnToggleRightSidebar');
+    if (btn) {
+      btn.classList.add('panel-closed');
+      btn.setAttribute('title', 'Open Quick Intelligence Panel');
+    }
+  }
+}
+
 // ── Navigation & Feature Mode Switching ─────────────────────────
 document.querySelectorAll('.nav-item[data-section]').forEach(el => {
   el.addEventListener('click', e => {
@@ -73,6 +96,9 @@ function switchSection(sec) {
 document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('dateBadge').textContent =
     new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  // Restore sidebar preferences
+  initRightSidebarState();
 
   // Default to MF view state
   switchSection('mf-overview');
@@ -1373,25 +1399,30 @@ let _activeChatCharts = {};
 
 function formatChatMarkdown(raw) {
   if (!raw) return '';
-  let html = raw.trim();
+  let text = raw.trim();
 
-  // 1. Convert Display Math ($$...$$) into Claude-Style Formula Environment Card
-  html = html.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
-    return `<div class="formula-env-card">
-      <div class="formula-env-header">
-        <span class="formula-env-badge">🧮 Formula Environment</span>
-      </div>
-      <div class="formula-env-body">$$${formula.trim()}$$</div>
-    </div>`;
+  // 1. Extract Display Math ($$...$$) placeholders to preserve pure math blocks
+  const mathBlocks = [];
+  text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+    const placeholder = `___MATH_BLOCK_${mathBlocks.length}___`;
+    mathBlocks.push(
+      `<div class="formula-env-card">
+        <div class="formula-env-header">
+          <span class="formula-env-badge">🧮 Mathematical Model</span>
+        </div>
+        <div class="formula-env-body">$$${formula.trim()}$$</div>
+      </div>`
+    );
+    return `\n\n${placeholder}\n\n`;
   });
 
   // 2. Convert Markdown tables to HTML table
   const tableRegex = /((?:\|[^\n]+\|\r?\n)+)/g;
-  html = html.replace(tableRegex, (match) => {
+  text = text.replace(tableRegex, (match) => {
     const lines = match.trim().split('\n').filter(l => l.trim().startsWith('|'));
     if (lines.length < 2) return match;
     
-    let tableHtml = '<div class="table-responsive"><table class="mf-table" style="margin:6px 0;">';
+    let tableHtml = '<div class="table-responsive"><table class="mf-table" style="margin:8px 0;">';
     let isHeader = true;
 
     lines.forEach((line, idx) => {
@@ -1409,39 +1440,63 @@ function formatChatMarkdown(raw) {
     });
 
     tableHtml += '</tbody></table></div>';
-    return tableHtml;
+    return `\n\n${tableHtml}\n\n`;
   });
 
   // 3. Headings
-  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-  html = html.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+  text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  text = text.replace(/^## (.*$)/gim, '<h3>$1</h3>');
 
   // 4. Bold & Italic
-  html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  text = text.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
   // 5. Horizontal Rules
-  html = html.replace(/^---$/gim, '<hr>');
+  text = text.replace(/^---$/gim, '<hr>');
 
-  // 6. Bullet Lists
-  html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>)/gims, '<ul>$1</ul>');
-  html = html.replace(/<\/ul>\s*<ul>/g, '');
+  // 6. Inline code
+  text = text.replace(/`([^`]+)`/g, '<code style="background:#F1F5F9;color:#0F172A;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:0.88em;border:1px solid #E2E8F0;">$1</code>');
 
-  // 7. Inline code
-  html = html.replace(/`([^`]+)`/g, '<code style="background:#F3F4F6;padding:2px 5px;border-radius:4px;font-family:monospace;font-size:0.85em;">$1</code>');
+  // 7. Non-Greedy Unordered Lists (bullet lines)
+  text = text.replace(/(?:^\s*[-*]\s+.*(?:\r?\n|$))+/gm, (listBlock) => {
+    const items = listBlock
+      .trim()
+      .split('\n')
+      .map(line => line.replace(/^\s*[-*]\s+/, '').trim())
+      .filter(line => line.length > 0)
+      .map(item => `<li>${item}</li>`)
+      .join('');
+    return `<ul>${items}</ul>\n\n`;
+  });
 
-  // 8. Clean paragraphs without runaway linebreaks
-  const blocks = html.split(/\n\s*\n/);
-  html = blocks.map(b => {
+  // 8. Non-Greedy Ordered Lists (numbered lines)
+  text = text.replace(/(?:^\s*\d+\.\s+.*(?:\r?\n|$))+/gm, (listBlock) => {
+    const items = listBlock
+      .trim()
+      .split('\n')
+      .map(line => line.replace(/^\s*\d+\.\s+/, '').trim())
+      .filter(line => line.length > 0)
+      .map(item => `<li>${item}</li>`)
+      .join('');
+    return `<ol>${items}</ol>\n\n`;
+  });
+
+  // 9. Split into discrete block-level sections and wrap prose in <p>
+  const rawBlocks = text.split(/\n\s*\n+/);
+  let html = rawBlocks.map(b => {
     b = b.trim();
     if (!b) return '';
-    if (b.startsWith('<h3') || b.startsWith('<ul') || b.startsWith('<div') || b.startsWith('<hr')) {
+    if (b.startsWith('<h3') || b.startsWith('<ul') || b.startsWith('<ol') || b.startsWith('<div') || b.startsWith('<hr') || b.startsWith('___MATH_BLOCK_')) {
       return b;
     }
     return `<p>${b.replace(/\n/g, '<br>')}</p>`;
   }).join('');
+
+  // 10. Re-inject Math Blocks without parent list pollution
+  mathBlocks.forEach((block, idx) => {
+    html = html.replace(`___MATH_BLOCK_${idx}___`, block);
+  });
 
   return html;
 }

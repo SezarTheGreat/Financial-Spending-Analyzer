@@ -242,29 +242,33 @@ def classify_form_tier_core(
     # 1. Debt & Cash
     if "Debt" in category or category in ["Liquid", "Credit Risk Debt", "Ultra Short Debt"]:
         if a1 >= 1.50 and a3 >= 1.50:
-            return "In-Form", f"Superior yield spread delivering +{a3:.2f}% 3Y alpha over category benchmark."
-        elif a1 >= -0.75 and a3 >= -0.75:
-            return "On-Track", f"Steady fixed-income yield tracking benchmark ({cagr_1y}% 1Y CAGR)."
-        elif a1 >= -2.0 or a3 >= -2.0:
-            return "Off-Track", f"Yield lagging category benchmark by {abs(min(a1, a3)):.2f}%."
+            return "In-Form", f"Superior yield spread delivering +{max(a1, a3):.2f}% alpha over category benchmark."
+        elif a1 >= -3.5 and (cagr_1y is None or cagr_1y >= 3.0):
+            return "On-Track", f"Steady fixed-income capital preservation tracking benchmark ({cagr_1y}% 1Y CAGR)."
+        elif (cagr_1y and cagr_1y < -3.0) and (a1 < -8.0 or a3 < -6.0):
+            return "Out-of-Form", f"Severe credit default drag underperforming benchmark by {abs(min(a1, a3)):.2f}%."
         else:
-            return "Out-of-Form", f"Chronic duration/credit drag underperforming benchmark by {abs(min(a1, a3)):.2f}%."
+            return "Off-Track", f"Yield lagging category benchmark by {abs(min(a1, a3)):.2f}%."
 
     # 2. Commodities (Passive physical bullion)
     if category == "Commodities":
-        if a1 < -3.0 or a3 < -3.0:
-            return "Off-Track", f"Tracking error causing {abs(min(a1, a3)):.2f}% drag against spot bullion."
+        if a1 > 1.50 or (cagr_1y and cagr_1y >= 18.0 and a1 >= 1.0):
+            return "In-Form", f"Strong commodity momentum (+{cagr_1y}% 1Y CAGR) generating +{a1:.2f}% alpha over bullion benchmark."
+        elif a1 >= -3.0:
+            return "On-Track", f"Tracking physical bullion closely ({cagr_1y}% 1Y CAGR, {a1:+.2f}% alpha)."
         elif a1 < -6.0 or a3 < -6.0:
             return "Out-of-Form", f"Severe commodity divergence lagging spot prices by {abs(min(a1, a3)):.2f}%."
         else:
-            return "On-Track", f"Passive bullion allocation tracking spot metal prices (1Y CAGR: {cagr_1y}%)."
+            return "Off-Track", f"Tracking error causing {abs(min(a1, a3)):.2f}% drag against spot bullion."
 
     # 3. Active Equities & Hybrids
-    if (a1 >= 2.00 and a3 >= 2.00) or (a1 >= 8.00 and a3 >= 0.0):
+    if (a1 >= 1.50 and a3 >= 0.0) or (a3 >= 1.50 and a1 >= -1.0) or (a1 >= 8.00):
         return "In-Form", f"Top-quartile alpha generator delivering +{a1:.2f}% 1Y and +{a3:.2f}% 3Y alpha over benchmark."
+    elif (cagr_1y and cagr_1y < 0.0) and (cagr_3y and cagr_3y >= 12.0) and a1 >= -2.5:
+        return "On-Track", f"Short-term 1Y consolidation ({cagr_1y}%) within resilient multi-year compounding trend ({cagr_3y}% 3Y CAGR)."
     elif a1 < -5.00 and a3 < -3.00:
         return "Out-of-Form", f"Chronic bottom-quartile underperformance lagging benchmark by {abs(a3):.2f}% (3Y)."
-    elif a1 < -1.50 or a3 < -1.50:
+    elif a1 < -2.00:
         return "Off-Track", f"Recent performance cooling and lagging category benchmark by {abs(min(a1, a3)):.2f}%."
     else:
         return "On-Track", f"Consistent baseline tracking category benchmark (1Y: {cagr_1y}%, 3Y: {cagr_3y}%)."
