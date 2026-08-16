@@ -3,7 +3,7 @@ from typing import List, Tuple
 import pyxirr
 import httpx
 import pandas as pd
-import quantstats as qs
+import numpy as np
 
 async def fetch_historical_nav(amfi_code: str) -> pd.Series:
     """
@@ -44,19 +44,37 @@ def calculate_xirr(cash_flows: List[Tuple[date, float]]) -> float:
 
 def compute_rolling_metrics(nav_series: pd.Series) -> dict:
     """
-    Computes CAGR, Sharpe, Sortino, and Max Drawdown using quantstats.
+    Computes CAGR, Sharpe, Sortino, and Max Drawdown using high-performance numpy/pandas.
     """
     if nav_series.empty or len(nav_series) < 30:
         return {}
 
-    # Calculate daily returns
-    returns = nav_series.pct_change().dropna()
+    start_val = float(nav_series.iloc[0])
+    end_val = float(nav_series.iloc[-1])
+    days = (nav_series.index[-1] - nav_series.index[0]).days
     
-    # Calculate metrics
-    metrics = {
-        "cagr": qs.stats.cagr(returns),
-        "sharpe": qs.stats.sharpe(returns),
-        "sortino": qs.stats.sortino(returns),
-        "max_drawdown": qs.stats.max_drawdown(returns)
+    if days > 0 and start_val > 0:
+        cagr = (end_val / start_val) ** (365.25 / days) - 1.0
+    else:
+        cagr = 0.0
+
+    returns = nav_series.pct_change().dropna()
+    mean_ret = float(returns.mean())
+    std_ret = float(returns.std())
+    
+    sharpe = float((mean_ret / std_ret) * np.sqrt(252)) if std_ret > 0 else 0.0
+    
+    neg_returns = returns[returns < 0]
+    downside_std = float(neg_returns.std()) if len(neg_returns) > 0 else 0.0
+    sortino = float((mean_ret / downside_std) * np.sqrt(252)) if downside_std > 0 else 0.0
+
+    cum_max = nav_series.cummax()
+    drawdown = (nav_series - cum_max) / cum_max
+    max_drawdown = float(drawdown.min())
+
+    return {
+        "cagr": round(cagr * 100.0, 2),
+        "sharpe": round(sharpe, 2),
+        "sortino": round(sortino, 2),
+        "max_drawdown": round(max_drawdown * 100.0, 2)
     }
-    return metrics
