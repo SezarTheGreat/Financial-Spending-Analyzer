@@ -349,15 +349,41 @@ pytest tests/test_adversarial_quant.py -v
 
 ---
 
-## 📸 Screenshots
+## 📸 Visual Showcase & Screenshots
 
-| Landing & Ingestion | Unified Analytics Dashboard |
+### 1. Landing Page & Dual Ingestion Gateway
+Unified entrypoint featuring dual-pipeline support for CAS statement PDFs (with password decryption) and bank transaction CSVs.
+
+![Landing Page](assets/LandingPage.png)
+
+---
+
+### 2. Mutual Fund Portfolio Intelligence & Quant Engine
+Comprehensive cashflow-level analytics, Newton-Raphson XIRR, distributor regular plan drag calculator, and risk drift evaluation.
+
+| Portfolio Overview & Risk Drift | Pairwise Stock Overlap Matrix |
 |:---:|:---:|
-| ![Landing Page](assets/LandingPage.png) | ![Dashboard](assets/Dashboard.png) |
+| ![MF Portfolio Audit](assets/MFPortfolioAudit.png) | ![Stock Overlap Matrix](assets/StockOverlap.png) |
 
-| Financial Health Scoring |
-|:---:|
-| ![Health Score](assets/HealthScore.png) |
+| Holdings & 4-Tier Rolling Return Form | FinWise AI Conversational Advisor |
+|:---:|:---:|
+| ![Holdings & Rolling Form](assets/HoldingsRollingForm.png) | ![AI Chatbot Advisor](assets/AIChatbotAdvisor.png) |
+
+---
+
+### 3. Bank Spending & Cashflow Analytics
+Real-time income vs. expense tracking, category breakdowns, savings rate tracking, and two-tailed Gaussian anomaly detection ($Z > 2.0$).
+
+| Spending Analytics Dashboard | Spending Anomalies & Health Score |
+|:---:|:---:|
+| ![Spending Dashboard](assets/Dashboard.png) | ![Spending Anomalies & Health Score](assets/SpendingAnomalies.png) |
+
+---
+
+### 4. System Architecture & Technical Attribution
+Tri-hybrid RAG design, quant engine architecture, and complete tech stack breakdown.
+
+![Architecture & About](assets/ArchitectureAbout.png)
 
 ---
 

@@ -405,6 +405,9 @@ Output fields:
                     report = AIAnalysisReport.model_validate_json(response.text)
                     return report
             except Exception as e:
+                if "RESOURCE_EXHAUSTED" in str(e) or "429" in str(e):
+                    logger.info("429 RESOURCE_EXHAUSTED encountered in generate_insights. Fast-failing immediately to deterministic quant AI synthesis.")
+                    return self.generate_deterministic_insights(portfolio, quant, risk_profile)
                 logger.warning(f"Google GenAI API call with {m} encountered error: {e}. Trying fallback.")
                 continue
 
