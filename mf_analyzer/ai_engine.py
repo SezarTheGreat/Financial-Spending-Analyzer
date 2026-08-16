@@ -7,6 +7,9 @@ import os
 import json
 import logging
 from typing import Optional, Dict, Any, List
+from dotenv import load_dotenv
+
+load_dotenv()
 from pydantic import ValidationError
 
 from google import genai
@@ -29,8 +32,11 @@ logger = logging.getLogger(__name__)
 
 
 class AIEngine:
-    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-2.5-flash"):
-        self.api_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-3.7-flash"):
+        if api_key is None:
+            self.api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        else:
+            self.api_key = api_key if api_key else None
         self.model_name = model_name
         self._client: Optional[genai.Client] = None
 
@@ -356,22 +362,24 @@ Synthesize this quantitative audit into a structured output conforming strictly 
 
         prompt = self._build_quant_context_prompt(portfolio, quant, risk_profile)
 
-        try:
-            # Using google-genai Client with Pydantic response_schema
-            response = self._client.models.generate_content(
-                model=self.model_name,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=AIAnalysisReport,
-                    temperature=0.1,
-                ),
-            )
-            
-            if response and response.text:
-                report = AIAnalysisReport.model_validate_json(response.text)
-                return report
-        except Exception as e:
-            logger.warning(f"Google GenAI API call encountered error: {e}. Falling back to deterministic synthesis.")
+        for m in [self.model_name, "gemini-3.7-flash", "gemini-3.5-flash", "gemini-flash-latest"]:
+            try:
+                # Using google-genai Client with Pydantic response_schema
+                response = self._client.models.generate_content(
+                    model=m,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=AIAnalysisReport,
+                        temperature=0.1,
+                    ),
+                )
+                
+                if response and response.text:
+                    report = AIAnalysisReport.model_validate_json(response.text)
+                    return report
+            except Exception as e:
+                logger.warning(f"Google GenAI API call with {m} encountered error: {e}. Trying fallback.")
+                continue
 
         return self.generate_deterministic_insights(portfolio, quant, risk_profile)

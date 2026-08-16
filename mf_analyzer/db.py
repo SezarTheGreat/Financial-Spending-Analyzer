@@ -7,6 +7,9 @@ import logging
 import uuid
 from typing import Optional, Dict, Any, List
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 from supabase import create_client, Client
 
 from .schemas import Portfolio, Holding, PortfolioAuditResponse
@@ -17,7 +20,13 @@ logger = logging.getLogger(__name__)
 class SupabasePortfolioDB:
     def __init__(self, supabase_url: Optional[str] = None, supabase_key: Optional[str] = None):
         self.url = supabase_url or os.environ.get("SUPABASE_URL")
-        self.key = supabase_key or os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_SERVICE_KEY")
+        self.key = (
+            supabase_key
+            or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+            or os.environ.get("SUPABASE_SECRET_KEY")
+            or os.environ.get("SUPABASE_ANON_KEY")
+            or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
+        )
         self.client: Optional[Client] = None
         self._memory_holdings: Dict[str, List[Dict[str, Any]]] = {}
         self._memory_audits: Dict[str, Dict[str, Any]] = {}

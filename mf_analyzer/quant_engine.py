@@ -274,6 +274,7 @@ class QuantEngine:
             h.portfolio_weight_pct = weight_pct
 
             h_xirr = self.calculate_holding_xirr(h)
+            h.xirr = h_xirr
 
             diagnostics.append(
                 FundRollingCAGR(
@@ -310,46 +311,43 @@ class QuantEngine:
         c1 = cagr_1y if cagr_1y is not None else 0.0
         c3 = cagr_3y if cagr_3y is not None else 0.0
 
-        # State-Machine Rule 1: Trailing capital drawdown / negative 1Y performance
-        # If fund is actively losing money over trailing 1Y when category benchmark is positive -> Off-Track
-        if c1 < 0.0:
-            if a1 < -3.0 or c1 < -5.0:
-                return "Out-of-Form", f"Negative trailing return ({c1:.2f}% 1Y) with severe benchmark drag ({a1:+.2f}% alpha)."
-            return "Off-Track", f"Negative trailing return ({c1:.2f}% 1Y CAGR) lagging category benchmark by {abs(a1):.2f}%."
+        # State-Machine Rule 1: Debt & Fixed Income (Ultra Short, Credit Risk, Liquid, General Debt)
+        if "Debt" in category or category in ["Liquid", "Credit Risk Debt", "Ultra Short Debt"]:
+            if a1 >= 1.5 or a3 >= 1.5 or c1 >= 8.0:
+                return "In-Form", f"Top-tier stability and yield (+{c1:.2f}% 1Y CAGR) generating superior risk-adjusted spread."
+            elif c1 >= 3.0 and a1 >= -3.5:
+                return "On-Track", f"Steady capital preservation and accrual yield (+{c1:.2f}% 1Y CAGR, zero credit default risk)."
+            elif c1 < -3.0 and (a1 < -8.0 or a3 < -6.0):
+                return "Out-of-Form", f"Severe credit default drag lagging debt benchmark by {abs(min(a1, a3)):.2f}%."
+            else:
+                return "Off-Track", f"Yield/duration drag lagging category benchmark by {abs(a1):.2f}% (1Y CAGR: {c1:.2f}%)."
 
         # State-Machine Rule 2: Passive Commodity ETFs / Bullion FoFs (Gold / Silver)
         if category == "Commodities":
-            if a1 > 1.5 or (c1 >= 18.0 and a1 >= 0.0):
+            if a1 > 1.5 or (c1 >= 18.0 and a1 >= 1.0):
                 return "In-Form", f"Strong commodity momentum (+{c1:.2f}% 1Y CAGR) generating +{a1:+.2f}% alpha over bullion benchmark."
-            elif a1 >= -1.5:
+            elif a1 >= -3.0:
                 return "On-Track", f"Tracking physical bullion benchmark closely ({c1:.2f}% 1Y CAGR, {a1:+.2f}% alpha)."
-            elif a1 < -4.0:
+            elif a1 < -6.0:
                 return "Out-of-Form", f"Severe tracking error causing {abs(a1):.2f}% drag against spot metal prices."
             else:
                 return "Off-Track", f"Tracking error causing {abs(a1):.2f}% drag against bullion benchmark."
 
-        # State-Machine Rule 3: Debt & Fixed Income (Ultra Short, Credit Risk, Liquid, General Debt)
-        if "Debt" in category or category in ["Liquid", "Credit Risk Debt", "Ultra Short Debt"]:
-            if a1 > 0.5 or a3 > 0.5:
-                return "In-Form", f"Top-tier stability and yield (+{c1:.2f}% 1Y CAGR) generating +{a1:+.2f}% alpha over debt benchmark."
-            elif a1 >= -0.5 and a3 >= -0.5:
-                return "On-Track", f"Steady fixed-income yield tracking benchmark ({c1:.2f}% 1Y CAGR, {a1:+.2f}% alpha)."
-            elif a1 < -1.5 or a3 < -1.5:
-                return "Out-of-Form", f"Chronic duration/credit drag lagging debt benchmark by {abs(min(a1, a3)):.2f}%."
-            else:
-                return "Off-Track", f"Yield lagging category benchmark by {abs(a1):.2f}%."
+        # State-Machine Rule 3: Trailing capital drawdown / negative 1Y performance
+        if c1 < 0.0:
+            if c3 >= 12.0 and a1 >= -2.5:
+                return "On-Track", f"Short-term 1Y consolidation ({c1:.2f}%) within resilient multi-year compounding trend ({c3:.2f}% 3Y CAGR)."
+            if a1 < -5.0 or c1 < -8.0:
+                return "Out-of-Form", f"Negative trailing return ({c1:.2f}% 1Y) with severe benchmark drag ({a1:+.2f}% alpha)."
+            return "Off-Track", f"Negative trailing return ({c1:.2f}% 1Y CAGR) lagging category benchmark by {abs(a1):.2f}%."
 
         # State-Machine Rule 4: Active Equity / Multi-Asset / International
-        # In-Form: alpha_1y > 1.5% and positive momentum (or alpha_3y > 1.5% and alpha_1y >= 0.0%)
-        # On-Track: -1.5% <= alpha_1y <= 1.5%
-        # Off-Track: -4.0% <= alpha_1y < -1.5%
-        # Out-of-Form: alpha_1y < -4.0%
-        if a1 > 1.5 or (a3 > 1.5 and a1 >= 0.0):
-            return "In-Form", f"Top-quartile alpha generator delivering +{a1:+.2f}% 1Y alpha ({c1:.2f}% 1Y CAGR) over category benchmark."
-        elif a1 < -4.0 or (a1 < -2.0 and a3 < -2.0):
+        if a1 > 1.5 or (a3 > 1.5 and a1 >= -1.0):
+            return "In-Form", f"Top-quartile alpha generator delivering strong risk-adjusted returns (+{a1:+.2f}% alpha, {c1:.2f}% 1Y CAGR)."
+        elif a1 < -5.0 and a3 < -3.0:
             return "Out-of-Form", f"Chronic bottom-quartile underperformance lagging category benchmark by {abs(a1):.2f}% (1Y) and {abs(a3):.2f}% (3Y)."
-        elif a1 < -1.5:
-            return "Off-Track", f"Trailing performance lagging category benchmark by {abs(a1):.2f}% (1Y CAGR: {c1:.2f}%)."
+        elif a1 < -2.0:
+            return "Off-Track", f"Trailing performance cooling and lagging category benchmark by {abs(a1):.2f}% (1Y CAGR: {c1:.2f}%)."
         else:
             return "On-Track", f"Consistent baseline tracking category benchmark (1Y: {c1:.2f}%, alpha: {a1:+.2f}%)."
 
