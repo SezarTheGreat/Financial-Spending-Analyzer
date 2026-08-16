@@ -14,11 +14,13 @@ import math
 import traceback
 import io
 import uuid
+from typing import Optional
 from supabase import create_client, Client
 
 from mf_analyzer.cas_parser import parse_cas_pdf, load_demo_portfolio
 from mf_analyzer.quant_engine import QuantEngine
 from mf_analyzer.ai_engine import AIEngine
+from mf_analyzer.chatbot_engine import chatbot_advisor_engine
 from mf_analyzer.db import db_service
 from mf_analyzer.schemas import Portfolio, PortfolioAuditResponse
 
@@ -583,6 +585,84 @@ def portfolio_re_evaluate_risk():
     db_service.save_audit_report(audit_response)
 
     return jsonify(audit_response.model_dump(mode="json"))
+
+@app.route('/api/chat', methods=['POST'])
+def chat_api():
+    """
+    Institutional AI Chatbot Advisor endpoint.
+    Processes multi-turn dialogue with zero-hallucination quant backing,
+    portfolio context awareness, Budget 2024 taxation, and SEBI regulatory guardrails.
+    """
+    data = request.get_json() or {}
+    message = data.get("message", "").strip()
+    session_id = data.get("session_id")
+    history = data.get("history", [])
+    risk_profile = data.get("risk_profile", "Moderate")
+
+    if not message:
+        return jsonify({"error": "Message cannot be empty."}), 400
+
+    # Load active portfolio context via audit_id or session
+    portfolio = None
+    audit_id = data.get("audit_id")
+    if audit_id:
+        portfolio = db_service.get_portfolio(audit_id)
+        if not portfolio:
+            stored = db_service.get_audit_report(audit_id)
+            if stored and isinstance(stored, dict) and "portfolio_summary" in stored:
+                s = stored["portfolio_summary"]
+                portfolio = Portfolio(
+                    investor_name=s.get("investor_name", "Valued Investor"),
+                    pan=s.get("pan", "–"),
+                    statement_period=s.get("statement_period", "–"),
+                    total_current_value=s.get("total_current_value", 0.0),
+                    total_cost_value=s.get("total_cost_value", 0.0),
+                    total_gain=s.get("total_gain", 0.0),
+                    holdings=s.get("holdings", []),
+                )
+
+    if not portfolio and session_id and session_id in _memory_sessions:
+        s = _memory_sessions[session_id]
+        if isinstance(s, dict) and "portfolio" in s:
+            portfolio = s["portfolio"]
+        elif isinstance(s, dict) and "holdings" in s:
+            portfolio = Portfolio(
+                investor_name=s.get("investor_name", "Investor"),
+                pan=s.get("pan", "–"),
+                statement_period=s.get("statement_period", "–"),
+                total_current_value=s.get("total_current_value", 0.0),
+                total_cost_value=s.get("total_cost_value", 0.0),
+                total_gain=s.get("total_gain", 0.0),
+                holdings=s.get("holdings", []),
+            )
+
+    if not portfolio:
+        portfolio = load_demo_portfolio()
+
+    # Calculate live quant diagnostics for prompt context
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        quant_diagnostics = loop.run_until_complete(quant_engine.run_diagnostics(portfolio, risk_profile=risk_profile))
+        loop.close()
+    except Exception as e:
+        print(f"Quant diagnostics run warning in chat: {e}")
+        quant_diagnostics = None
+
+    res = chatbot_advisor_engine.generate_chat_response_payload(
+        user_message=message,
+        portfolio=portfolio,
+        quant_diagnostics=quant_diagnostics,
+        risk_profile=risk_profile,
+        history=history,
+    )
+
+    return jsonify({
+        "reply": res["reply"],
+        "chart": res.get("chart"),
+        "session_id": session_id,
+        "risk_profile": risk_profile
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

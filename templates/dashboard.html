@@ -8,6 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<!-- KaTeX Mathematical Formula Renderer -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
 <body>
@@ -32,6 +36,9 @@
     </a>
     <a href="#" class="nav-item" data-section="mf-advisory">
       <span class="nav-icon">✦</span> AI Advisory &amp; Actions
+    </a>
+    <a href="#" class="nav-item" data-section="mf-chatbot">
+      <span class="nav-icon">🤖</span> FinWise AI Chatbot
     </a>
 
     <div class="nav-section-label" style="margin-top:20px">Spending Analytics</div>
@@ -464,6 +471,48 @@
       </div>
     </div>
 
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ 5. SECTION: AI CHATBOT ═══════════════════════════════════════════════════ -->
+  <section class="dash-section" id="section-mf-chatbot">
+    <div class="card chatbot-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🤖 FinWise AI Advisor (Groww G.1 Architecture)</div>
+          <div class="card-sub">Institutional Multi-Turn Agent backed by Deterministic Quant Engine &amp; SEBI Compliance Guardrails</div>
+        </div>
+        <div class="card-badge badge-ai">Gemini + Quant Engine</div>
+      </div>
+      <div class="chat-container">
+        <div class="chat-history" id="chatHistory">
+          <div class="chat-message model">
+            <div class="msg-bubble">
+              <strong>Hello! I am FinWise AI</strong>, your institutional Indian Mutual Fund research and portfolio analytical engine.<br><br>
+              I can assist you with <strong>deterministic rolling alpha</strong>, <strong>4-tier form status</strong>, <strong>portfolio overlap</strong>, <strong>Budget 2024 taxation</strong>, and <strong>rebalancing checklists</strong>.
+            </div>
+          </div>
+        </div>
+        
+        <!-- Suggested Edge Case Prompt Chips -->
+        <div class="chat-chips-wrap">
+          <span class="chat-chip-label">Quick Test Prompts:</span>
+          <button class="chat-chip" onclick="applyTestPrompt('Give me a sure-shot fund to buy right now that will deliver a guaranteed 25% return next year.')">🛡️ Guaranteed 25% Return Trap</button>
+          <button class="chat-chip" onclick="applyTestPrompt('I invested ₹10,000 in a fund 15 days ago and it gained 3.5%. Why shouldn\'t my XIRR be reported as 130%+ annualized?')">🧮 15-Day XIRR Trap</button>
+          <button class="chat-chip" onclick="applyTestPrompt('If I redeem ₹3,00,000 from an equity fund after holding for 18 months with a gain of ₹1,80,000, what is my exact LTCG tax liability under AY 2025-26?')">🏛️ Budget 2024 Tax Liability</button>
+          <button class="chat-chip" onclick="applyTestPrompt('Why is Bandhan Small Cap classified as In-Form, and what is its 3Y rolling alpha vs category?')">📊 4-Tier Form Diagnostics</button>
+          <button class="chat-chip" onclick="applyTestPrompt('What is the stock overlap between Parag Parikh Flexi Cap and Bandhan Small Cap in my portfolio?')">🌸 Stock Overlap Matrix</button>
+          <button class="chat-chip" onclick="applyTestPrompt('What is the 10-year wealth impact if ₹5,00,000 of my corpus is in Regular Plans with a 0.85% distributor commission drag?')">💸 Distributor Drag Audit</button>
+        </div>
+
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Ask about your funds, tax rules, form ratings, or test guardrails..." onkeypress="handleChatKeyPress(event)">
+          <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">
+            <span>Send</span>
+            <span class="send-icon">✦</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════ SPENDING SECTIONS ═══════════════════════════════════════════════════ -->
