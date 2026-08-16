@@ -581,19 +581,25 @@ async function submitCsvAnalysis() {
 
   try {
     const res = await fetch('/api/upload', { method: 'POST', body: fd });
-    const data = await res.json();
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      const txt = await res.text();
+      data = { error: txt || `Server returned ${res.status}` };
+    }
     if (res.ok && data.success) {
       showToast('✓ Transactions loaded!');
       setTimeout(() => window.location.href = '/dashboard', 600);
     } else {
       document.getElementById('csv-loader').style.display = 'none';
       document.getElementById('btn-analyze-csv').disabled = false;
-      showToast('⚠️ ' + (data.error || 'CSV upload failed.'));
+      showToast('⚠️ ' + (data.error || `Error ${res.status}: CSV upload failed.`));
     }
   } catch (err) {
     document.getElementById('csv-loader').style.display = 'none';
     document.getElementById('btn-analyze-csv').disabled = false;
-    showToast('⚠️ Error uploading CSV.');
+    showToast('⚠️ Network Error: ' + (err.message || 'Error uploading CSV.'));
   }
 }
 
@@ -601,15 +607,23 @@ async function loadSpendingDemo() {
   document.getElementById('csv-loader').style.display = 'flex';
   try {
     const res = await fetch('/api/sample');
-    const data = await res.json();
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      const txt = await res.text();
+      data = { error: txt || `Server returned ${res.status}` };
+    }
     if (res.ok && data.success) {
       showToast('✓ Sample spending data loaded!');
       setTimeout(() => window.location.href = '/dashboard', 500);
     } else {
-      showToast('⚠️ Failed to load sample.');
+      document.getElementById('csv-loader').style.display = 'none';
+      showToast('⚠️ ' + (data.error || `Error ${res.status}: Failed to load sample.`));
     }
   } catch (err) {
-    showToast('⚠️ Connection error.');
+    document.getElementById('csv-loader').style.display = 'none';
+    showToast('⚠️ Network Error: ' + (err.message || 'Check server status.'));
   }
 }
 

@@ -361,11 +361,9 @@ def save_df(dataframe):
     if supabase:
         try:
             upload_id = str(uuid.uuid4())
-            storage_path = f"{session_id}/{upload_id}.parquet"
-            buf = io.BytesIO()
-            dataframe.to_parquet(buf, index=False)
-            buf.seek(0)
-            supabase.storage.from_(UPLOAD_BUCKET).upload(storage_path, buf.getvalue(), {"content-type": "application/octet-stream"})
+            storage_path = f"{session_id}/{upload_id}.csv"
+            csv_bytes = dataframe.to_csv(index=False).encode('utf-8')
+            supabase.storage.from_(UPLOAD_BUCKET).upload(storage_path, csv_bytes, {"content-type": "text/csv"})
             supabase.table(UPLOADS_TABLE).insert({"session_id": session_id, "storage_path": storage_path}).execute()
             session["storage_path"] = storage_path
         except Exception as e:
@@ -380,9 +378,11 @@ def load_df():
     if storage_path and supabase:
         try:
             raw = supabase.storage.from_(UPLOAD_BUCKET).download(storage_path)
-            return pd.read_parquet(io.BytesIO(raw)), None
+            df = pd.read_csv(io.BytesIO(raw))
+            df['date'] = pd.to_datetime(df['date'])
+            return df, None
         except Exception as e:
-            return None, f"Supabase download failed: {e}"
+            print(f"Supabase download fallback: {e}")
             
     # Default to sample dataset if nothing uploaded
     sample = generate_sample_data()
