@@ -62,6 +62,42 @@ app = Flask(
 )
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
 
+class WSGIPathNormalizer:
+    """
+    Normalizes incoming WSGI PATH_INFO so rewritten serverless requests (e.g. /api/index.py or /api/index)
+    transparently map to root '/', '/dashboard', and all underlying endpoints.
+    """
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO', '/')
+        
+        orig = (
+            environ.get('HTTP_X_MATCHED_PATH')
+            or environ.get('HTTP_X_FORWARDED_PATH')
+            or environ.get('HTTP_X_FORWARDED_URI')
+            or environ.get('RAW_URI')
+            or environ.get('REQUEST_URI')
+        )
+        if orig and not (orig.startswith('/api/index') or orig == '/api'):
+            path = orig.split('?')[0]
+        else:
+            for prefix in ['/api/index.py', '/api/index', '/index.py', '/index']:
+                if path.startswith(prefix):
+                    path = path[len(prefix):]
+                    break
+        
+        if not path or path == '':
+            path = '/'
+        if not path.startswith('/'):
+            path = '/' + path
+
+        environ['PATH_INFO'] = path
+        return self.wsgi_app(environ, start_response)
+
+app.wsgi_app = WSGIPathNormalizer(app.wsgi_app)
+
 # Supabase Client Initialization with Graceful Fallback
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", os.environ.get("SUPABASE_SERVICE_KEY", ""))
