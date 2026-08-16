@@ -502,7 +502,15 @@ async function submitMfAnalysis() {
       method: 'POST',
       body: fd,
     });
-    const data = await res.json();
+    
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      const txt = await res.text();
+      data = { detail: txt || `Server responded with status ${res.status}` };
+    }
+
     if (res.ok) {
       document.getElementById('stage-4').className = 'stage-item done';
       sessionStorage.setItem('finwise_portfolio_audit', JSON.stringify(data));
@@ -511,12 +519,12 @@ async function submitMfAnalysis() {
     } else {
       loader.style.display = 'none';
       btn.disabled = false;
-      showToast('⚠️ ' + (data.detail || data.error || 'Failed to process statement.'));
+      showToast('⚠️ ' + (data.detail || data.error || `Error ${res.status}: Failed to process statement.`));
     }
   } catch (err) {
     loader.style.display = 'none';
     btn.disabled = false;
-    showToast('⚠️ Connection error. Check server status.');
+    showToast('⚠️ Network Error: ' + (err.message || 'Check server status.'));
   }
 }
 
@@ -535,7 +543,15 @@ async function loadMfDemo() {
       method: 'POST',
       body: fd,
     });
-    const data = await res.json();
+    
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      const txt = await res.text();
+      data = { detail: txt || `Server responded with status ${res.status}` };
+    }
+
     if (res.ok) {
       document.getElementById('stage-4').className = 'stage-item done';
       sessionStorage.setItem('finwise_portfolio_audit', JSON.stringify(data));
@@ -544,12 +560,12 @@ async function loadMfDemo() {
     } else {
       loader.style.display = 'none';
       btn.disabled = false;
-      showToast('⚠️ ' + (data.detail || 'Demo analysis failed.'));
+      showToast('⚠️ ' + (data.detail || data.error || `Error ${res.status}: Demo analysis failed.`));
     }
   } catch (err) {
     loader.style.display = 'none';
     btn.disabled = false;
-    showToast('⚠️ Connection error.');
+    showToast('⚠️ Network Error: ' + (err.message || 'Check server status.'));
   }
 }
 
