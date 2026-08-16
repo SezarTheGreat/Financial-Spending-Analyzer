@@ -502,15 +502,21 @@ class QuantEngine:
             drift_status = "Aligned"
             rec = f"Equity exposure ({actual_eq}%) is fully aligned with target range [{target_range[0]}% - {target_range[1]}%] for {risk_profile} profile."
         elif actual_eq > target_range[1]:
-            if (actual_eq - target_range[1]) >= 15.0:
+            diff = actual_eq - target_range[1]
+            if diff >= 15.0:
                 drift_status = "High Risk Drift"
-                rec = f"Critical risk drift: Equity exposure ({actual_eq}%) exceeds upper bound ({target_range[1]}%) by {actual_eq - target_range[1]:.2f}%. High vulnerability to market pullbacks."
+                rec = f"Critical risk drift: Equity exposure ({actual_eq}%) exceeds upper bound ({target_range[1]}%) by {diff:.2f}%. High vulnerability to equity market drawdowns."
             else:
                 drift_status = "Over-Allocated to Equity"
                 rec = f"Equity exposure ({actual_eq}%) is above target range [{target_range[0]}% - {target_range[1]}%]. Consider rebalancing excess capital into Debt/Commodities."
         else:
-            drift_status = "Under-Allocated to Equity"
-            rec = f"Equity exposure ({actual_eq}%) is below target range [{target_range[0]}% - {target_range[1]}%]. Portfolio is conservative and defensive."
+            diff = target_range[0] - actual_eq
+            if diff >= 20.0:
+                drift_status = "High Risk Drift"
+                rec = f"Critical wealth accumulation drag: Equity exposure ({actual_eq}%) is {diff:.2f}% below target threshold ({target_range[0]}%). Heavy fixed income/cash drag limits long-term compounding for an {risk_profile} investor."
+            else:
+                drift_status = "Under-Allocated to Equity"
+                rec = f"Equity exposure ({actual_eq}%) is below target range [{target_range[0]}% - {target_range[1]}%]. Portfolio is conservative and defensive."
 
         return AssetDriftAnalysis(
             risk_profile=risk_profile,

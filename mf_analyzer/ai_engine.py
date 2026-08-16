@@ -117,11 +117,25 @@ DO NOT recalculate or hallucinate mathematical figures. Reason strictly over the
 - **Portfolio Overlap Matrix**:
 {json.dumps(overlap_matrix, indent=2)}
 
-### INSTRUCTIONS:
-Synthesize this quantitative audit into a structured output conforming strictly to the requested schema:
-1. 'health_score': An integer (0-100) reflecting overall portfolio hygiene, heavily penalizing regular commission drag, chronic underperformance, severe asset drift, and stock overlap.
+### INSTRUCTIONS FOR DETERMINISTIC QUANT HEALTH SCORE (0-100):
+Synthesize this quantitative audit into a structured output conforming strictly to the requested schema.
+Calculate 'health_score' using this strict institutional quantitative deduction model starting at 100:
+1. Asset Allocation Drift Penalty (0 to 35 pts):
+   - Aligned (within target range): 0 pts
+   - Under-Allocation shortfall: deduct 0.9 pts per 1.0% equity shortfall below target floor (e.g. 37% gap = -33 pts)
+   - Over-Allocation surplus: deduct 1.0 pts per 1.0% equity excess above target ceiling (e.g. 20% gap = -20 pts)
+2. Cost Drag & Commission Penalty (0 to 30 pts):
+   - Deduct (Regular_Corpus / Total_Corpus) * 30 pts (+ 5 pts baseline if any regular plans exist)
+3. Fund Form & Alpha Drag Penalty (0 to 30 pts):
+   - Deduct 15 pts per Out-of-Form fund, 8 pts per Off-Track fund, 4 pts per Lagging Alpha fund
+4. Stock Overlap & Duplication Penalty (0 to 20 pts):
+   - Deduct 8 pts per High Overlap Pair (>=30% stock overlap)
+Final Health Score must strictly equal: max(10, min(98, 100 - total_penalties)).
+
+Output fields:
+1. 'health_score': An integer (0-100) computed using the above strict formula.
 2. 'risk_alignment_verdict': Detailed synthesis of risk drift and suitability for a '{risk_profile}' investor.
-3. 'key_alerts': Severity-tagged alerts (HIGH, MEDIUM, LOW) capturing critical risks (e.g. Regular plan commission drag, high overlap, out-of-form funds).
+3. 'key_alerts': Severity-tagged alerts (HIGH, MEDIUM, LOW) capturing critical risks.
 4. 'fund_recommendations': Actionable advice for EVERY holding ('HOLD', 'CONTINUE_SIP', 'PAUSE_SIP', 'SWITCH_TO_DIRECT', 'EXIT_AND_REINVEST') with concrete rationale.
 5. 'step_by_step_rebalance_checklist': A prioritized chronological roadmap for the investor to execute.
 """
@@ -130,33 +144,45 @@ Synthesize this quantitative audit into a structured output conforming strictly 
     def generate_deterministic_insights(self, portfolio: Portfolio, quant: QuantDiagnostics, risk_profile: RiskProfile) -> AIAnalysisReport:
         """
         Deterministic rule-based AI synthesizer used when GenAI API key is unavailable or in offline environments.
-        Guarantees 100% schema compliance and rigorous quant reasoning.
+        Guarantees 100% schema compliance and rigorous, conservative institutional quant reasoning.
         """
         # Calculate Base Health Score (out of 100)
         score = 100
 
-        # Cost Drag Penalty: up to -25 points
+        # 1. Asset Allocation Drift Penalty (Continuous proportional penalty up to -35 points)
+        target_range = quant.asset_drift.target_equity_range
+        actual_eq = quant.asset_drift.actual_equity_pct
+        if target_range[0] <= actual_eq <= target_range[1]:
+            drift_penalty = 0
+        elif actual_eq < target_range[0]:
+            gap = target_range[0] - actual_eq
+            drift_penalty = int(min(35, max(8, gap * 0.9)))
+        else:
+            gap = actual_eq - target_range[1]
+            drift_penalty = int(min(35, max(8, gap * 1.0)))
+        score -= drift_penalty
+
+        # 2. Cost Drag Penalty: up to -30 points
         if quant.cost_drag.affected_schemes_count > 0:
             reg_ratio = quant.cost_drag.total_regular_corpus / max(1.0, portfolio.total_current_value)
-            drag_penalty = int(min(25.0, reg_ratio * 25.0 + 5.0))
+            drag_penalty = int(min(30.0, reg_ratio * 25.0 + 5.0))
             score -= drag_penalty
 
-        # Form Rating Penalty: up to -30 points
+        # 3. Form Rating & Alpha Drag Penalty: up to -30 points
         out_of_form_count = sum(1 for f in quant.form_ratings if f.form_tier == "Out-of-Form")
         off_track_count = sum(1 for f in quant.form_ratings if f.form_tier == "Off-Track")
-        score -= min(30, (out_of_form_count * 15 + off_track_count * 8))
+        lagging_alpha_count = sum(1 for f in quant.form_ratings if (f.alpha_1y or 0.0) < -2.0)
+        score -= min(30, (out_of_form_count * 15 + off_track_count * 8 + lagging_alpha_count * 4))
 
-        # Asset Drift Penalty: up to -25 points
-        if quant.asset_drift.drift_status == "High Risk Drift":
-            score -= 20
-        elif quant.asset_drift.drift_status in ["Over-Allocated to Equity", "Under-Allocated to Equity"]:
-            score -= 10
-
-        # High Overlap Penalty: up to -15 points
+        # 4. High Overlap Penalty: up to -20 points
         if len(quant.overlap_matrix.high_overlap_pairs) > 0:
-            score -= min(15, len(quant.overlap_matrix.high_overlap_pairs) * 5)
+            score -= min(20, len(quant.overlap_matrix.high_overlap_pairs) * 8)
 
-        health_score = max(10, min(95, score))
+        # 5. Over-diversification (>10 fragmented funds): up to -10 points
+        if len(portfolio.holdings) > 10:
+            score -= min(10, (len(portfolio.holdings) - 10) * 2)
+
+        health_score = max(10, min(98, score))
 
         # Risk Alignment Verdict
         drift = quant.asset_drift
