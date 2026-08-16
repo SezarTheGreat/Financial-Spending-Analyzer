@@ -397,6 +397,10 @@ def index():
 def dashboard_page():
     return render_template('dashboard.html')
 
+@app.route('/about')
+def about_page():
+    return render_template('about.html')
+
 # ── Bank Spending API Endpoints ──
 @app.route('/api/upload', methods=['POST'])
 def upload_csv():

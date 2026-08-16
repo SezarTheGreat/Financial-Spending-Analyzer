@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FinWise — Mutual Fund Portfolio & Financial Spending Analyzer</title>
 <meta name="description" content="Institutional-grade Mutual Fund Portfolio & Spending Analyzer with deterministic quant engine, Newton-Raphson XIRR, distributor drag calculator, and Google Gemini AI insights.">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="alternate icon" href="/static/favicon.ico">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -43,7 +46,7 @@
     backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(26,26,46,0.06);
   }
-  .logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--ink); letter-spacing: -0.5px; font-weight: 700; }
+  .logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--ink); letter-spacing: -0.5px; font-weight: 700; text-decoration: none; }
   .logo span { color: var(--blush); }
   .nav-links { display: flex; align-items: center; gap: 24px; }
   .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
@@ -243,11 +246,12 @@
 <body>
 
 <nav>
-  <div class="logo">Fin<span>Wise</span></div>
+  <a href="/" style="text-decoration:none;"><div class="logo">Fin<span>Wise</span></div></a>
   <div class="nav-links">
     <span class="nav-pill-badge">✦ Hybrid Quant & AI</span>
     <a href="#features">Features</a>
     <a href="/dashboard">Direct Dashboard</a>
+    <a href="/about">About</a>
   </div>
 </nav>
 

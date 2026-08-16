@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — FinWise AI & Architecture</title>
+<meta name="description" content="About FinWise: Institutional Mutual Fund AI, Financial Spending Intelligence, Tri-Hybrid RAG architecture, and contributor attribution.">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="alternate icon" href="/static/favicon.ico">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:     #F5F0E8;
+    --blush:     #F4A7B9;
+    --butter:    #F5E642;
+    --sage:      #B8D4A8;
+    --lavender:  #C9B8E8;
+    --peach:     #FFD9A0;
+    --teal:      #A8D4D4;
+    --ink:       #1A1A2E;
+    --ink2:      #2D2D44;
+    --muted:     #7A7A9A;
+    --white:     #FEFEFE;
+    --border:    rgba(26,26,46,0.08);
+    --shadow-sm: 0 4px 16px rgba(26,26,46,0.06);
+    --shadow-md: 0 12px 40px rgba(26,26,46,0.1);
+    --shadow-lg: 0 20px 50px rgba(26,26,46,0.14);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 48px;
+    background: rgba(245,240,232,0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-link { text-decoration: none; display: flex; align-items: center; gap: 4px; }
+  .logo { font-family: 'Playfair Display', serif; font-size: 1.45rem; color: var(--ink); letter-spacing: -0.5px; font-weight: 700; }
+  .logo span { color: var(--blush); }
+  .nav-links { display: flex; align-items: center; gap: 20px; }
+  .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--ink); font-weight: 600; }
+  .nav-pill-btn {
+    background: var(--ink); color: var(--butter); font-size: 0.76rem; font-weight: 600;
+    padding: 7px 16px; border-radius: 20px; text-decoration: none; letter-spacing: 0.5px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .nav-pill-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+
+  /* ── Page Layout ── */
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 100px 24px 60px;
+  }
+
+  /* ── Hero Section ── */
+  .hero-section {
+    text-align: center;
+    padding: 40px 16px 50px;
+  }
+  .badge-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 6px 16px; border-radius: 24px;
+    font-size: 0.8rem; font-weight: 600; color: var(--ink2);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+  }
+  .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blush); }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -1px;
+    line-height: 1.18;
+    margin-bottom: 18px;
+  }
+  .hero-title span { color: var(--blush); }
+  .hero-subtitle {
+    font-size: 1.12rem;
+    color: var(--muted);
+    max-width: 760px;
+    margin: 0 auto 32px;
+    line-height: 1.65;
+  }
+
+  /* ── Section Titles ── */
+  .section-header {
+    text-align: center;
+    margin: 60px 0 36px;
+  }
+  .section-subtitle {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  /* ── Architecture Grid ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .tech-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .tech-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+  .tech-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: var(--accent-color, var(--blush));
+  }
+  .tech-card-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 16px;
+  }
+  .tech-icon-wrap {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--icon-bg, #FFF5F7);
+    color: var(--icon-color, var(--blush));
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .tech-tier-badge {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 3px 8px; border-radius: 6px; background: rgba(26,26,46,0.06); color: var(--ink2);
+  }
+  .tech-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.22rem; font-weight: 700; color: var(--ink);
+  }
+  .tech-card-desc {
+    font-size: 0.92rem; color: var(--muted); line-height: 1.55; margin-bottom: 16px; flex-grow: 1;
+  }
+  .tech-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .tech-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.76rem; background: #F1F5F9; color: #334155;
+    padding: 3px 8px; border-radius: 6px; border: 1px solid #E2E8F0;
+  }
+
+  /* ── Team Contributor Cards ── */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 28px;
+  }
+  .contributor-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .contributor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+  .contributor-header {
+    display: flex; align-items: center; gap: 18px; margin-bottom: 20px;
+  }
+  .contributor-avatar {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--avatar-start, #F4A7B9), var(--avatar-end, #C9B8E8));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--white);
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+  }
+  .contributor-meta h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.38rem; font-weight: 700; color: var(--ink); margin-bottom: 4px;
+  }
+  .contributor-role {
+    font-size: 0.88rem; font-weight: 600; color: var(--muted);
+  }
+  .contributor-bio {
+    font-size: 0.94rem; color: var(--ink2); line-height: 1.6; margin-bottom: 24px; flex-grow: 1;
+  }
+  .contributor-links {
+    display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--border); padding-top: 20px;
+  }
+  .social-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 12px;
+    font-size: 0.84rem; font-weight: 600; text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .social-btn.github {
+    background: #181717; color: #FFFFFF;
+  }
+  .social-btn.github:hover {
+    background: #2D2D2D; transform: translateY(-1px);
+  }
+  .social-btn.linkedin {
+    background: #0A66C2; color: #FFFFFF;
+  }
+  .social-btn.linkedin:hover {
+    background: #004182; transform: translateY(-1px);
+  }
+  .social-btn.repo {
+    background: #F1F5F9; color: #1E293B; border: 1px solid #CBD5E1;
+  }
+  .social-btn.repo:hover {
+    background: #E2E8F0; transform: translateY(-1px);
+  }
+
+  /* ── Compliance & Footer ── */
+  .about-footer {
+    margin-top: 80px;
+    padding: 40px 24px;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-radius: 24px 24px 0 0;
+    text-align: center;
+  }
+  .footer-badges {
+    display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .badge-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.82rem; font-weight: 600; padding: 6px 14px;
+    border-radius: 20px; background: #F8FAFC; border: 1px solid #E2E8F0; color: #475569;
+  }
+  .disclaimer-text {
+    font-size: 0.82rem; color: var(--muted); max-width: 800px; margin: 0 auto; line-height: 1.6;
+  }
+  .copyright-text {
+    font-size: 0.82rem; color: var(--muted); margin-top: 18px; font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .container { padding: 80px 16px 40px; }
+    .team-grid { grid-template-columns: 1fr; }
+    .tech-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ HEADER NAV -->
+<nav>
+  <a href="/" class="logo-link" aria-label="FinWise Home">
+    <span class="logo">Fin<span>Wise</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/about" class="active">About</a>
+    <a href="/dashboard" class="nav-pill-btn">Open App</a>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- ═══════════════════════════════════════════════════ HERO -->
+  <header class="hero-section">
+    <div class="badge-tag">
+      <span class="badge-dot"></span>
+      <span>Institutional AI Financial Architecture</span>
+    </div>
+    <h1 class="hero-title">Fin<span>Wise</span> — Mutual Fund AI &amp; Spending Intelligence</h1>
+    <p class="hero-subtitle">
+      Democratizing institutional-grade financial diagnostics, portfolio auditing, and SEBI regulatory intelligence with zero cloud subscription fees. Built on a deterministic quant engine, serverless vector search, and Google Gemini.
+    </p>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════ ARCHITECTURE SHOWCASE -->
+  <section aria-labelledby="arch-title">
+    <div class="section-header">
+      <div class="section-subtitle">Under The Hood</div>
+      <h2 class="section-title" id="arch-title">Core Technology Architecture</h2>
+    </div>
+
+    <div class="tech-grid">
+      <!-- 1. AI & Intent Routing -->
+      <div class="tech-card" style="--accent-color:#4F46E5; --icon-bg:#EEF2FF; --icon-color:#4F46E5;">
+        <div class="tech-card-header">
+          <div class="tech-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>
+              <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0-2 2a2 2 0 0 0-2-2a2 2 0 0 0 2-2"/>
+              <path d="M19 11h2m-1-1v2"/>
+            </svg>
+          </div>
+          <div>
+            <span class="tech-tier-badge">AI Orchestration</span>
+            <div class="tech-card-title">Google Gemini 3.7</div>
+          </div>
+        </div>
+        <p class="tech-card-desc">
+          Structured tool-calling pipeline with a 1M+ token context window. Employs zero-hallucination guardrails and statutory regulatory disclaimers modeled after Groww G.1 architecture.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">Structured Output</span>
+          <span class="tech-tag">Pydantic Schemas</span>
+          <span class="tech-tag">Fast-Fail Quota</span>
+        </div>
+      </div>
+
+      <!-- 2. Tier 1 - SQL Deterministic Rules -->
+      <div class="tech-card" style="--accent-color:#059669; --icon-bg:#ECFDF5; --icon-color:#059669;">
+        <div class="tech-card-header">
+          <div class="tech-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="5" rx="9" ry="3"/>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+              <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+            </svg>
+          </div>
+          <div>
+            <span class="tech-tier-badge">Tier 1 • Rule Engine</span>
+            <div class="tech-card-title">Supabase Postgres</div>
+          </div>
+        </div>
+        <p class="tech-card-desc">
+          Deterministic SQL rule engine with Row-Level Security (RLS). Houses official exit load schedules, statutory asset allocation mandates, and user audit session persistence.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">PostgreSQL</span>
+          <span class="tech-tag">RLS Security</span>
+          <span class="tech-tag">SID Mandates</span>
+        </div>
+      </div>
+
+      <!-- 3. Tier 2 - Serverless Vector Store -->
+      <div class="tech-card" style="--accent-color:#0284C7; --icon-bg:#F0F9FF; --icon-color:#0284C7;">
+        <div class="tech-card-header">
+          <div class="tech-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+          </div>
+          <div>
+            <span class="tech-tier-badge">Tier 2 • Vector RAG</span>
+            <div class="tech-card-title">LanceDB &amp; Cloudflare R2</div>
+          </div>
+        </div>
+        <p class="tech-card-desc">
+          Serverless embedded vector store reading Parquet indices over Cloudflare R2 with $0 egress fees. Fast approximate nearest neighbors (ANN) across 500+ mutual fund factsheets.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">LanceDB</span>
+          <span class="tech-tag">Cloudflare R2</span>
+          <span class="tech-tag">$0 Egress Storage</span>
+        </div>
+      </div>
+
+      <!-- 4. Tier 3 - JIT In-Memory Parser -->
+      <div class="tech-card" style="--accent-color:#D97706; --icon-bg:#FFFBEB; --icon-color:#D97706;">
+        <div class="tech-card-header">
+          <div class="tech-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <circle cx="11.5" cy="14.5" r="2.5"/>
+              <path d="M13.5 16.5L17 20"/>
+            </svg>
+          </div>
+          <div>
+            <span class="tech-tier-badge">Tier 3 • JIT Parsing</span>
+            <div class="tech-card-title">PyMuPDF4LLM Streaming</div>
+          </div>
+        </div>
+        <p class="tech-card-desc">
+          Zero-disk in-memory PDF parsing via Python <code>io.BytesIO</code> streams. Instantly digests password-protected CAMS/KFintech CAS statements and multi-format bank PDFs.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">PyMuPDF4LLM</span>
+          <span class="tech-tag">Zero-Disk Storage</span>
+          <span class="tech-tag">CAS Parser</span>
+        </div>
+      </div>
+
+      <!-- 5. Quant Engine -->
+      <div class="tech-card" style="--accent-color:#DC2626; --icon-bg:#FEF2F2; --icon-color:#DC2626;">
+        <div class="tech-card-header">
+          <div class="tech-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+              <polyline points="16 7 22 7 22 13"/>
+            </svg>
+          </div>
+          <div>
+            <span class="tech-tier-badge">Institutional Math</span>
+            <div class="tech-card-title">Quant Performance Engine</div>
+          </div>
+        </div>
+        <p class="tech-card-desc">
+          Newton-Raphson multi-cashflow XIRR solver with SEBI &lt;180d short-vintage guards, pairwise stock overlap Venn matrices, rolling 1Y/3Y alpha, and Section 112A/50AA tax math.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">pyxirr</span>
+          <span class="tech-tag">quantstats</span>
+          <span class="tech-tag">4-Tier Form</span>
+        </div>
+      </div>
+
+      <!-- 6. Deployment & Automation -->
+      <div class="tech-card" style="--accent-color:#F4A7B9; --icon-bg:#FFF5F7; --icon-color:#E11D48;">
+        <div class="tech-card-header">
+          <div class="tech-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+              <line x1="6" y1="6" x2="6.01" y2="6"/>
+              <line x1="6" y1="18" x2="6.01" y2="18"/>
+            </svg>
+          </div>
+          <div>
+            <span class="tech-tier-badge">Cloud Architecture</span>
+            <div class="tech-card-title">Serverless Vercel &amp; CI/CD</div>
+          </div>
+        </div>
+        <p class="tech-card-desc">
+          Stateless Python WSGI serverless deployment on Vercel with automated GitHub Actions offline batch indexing pipelines and continuous pytest suites.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">Vercel Serverless</span>
+          <span class="tech-tag">GitHub Actions</span>
+          <span class="tech-tag">100% CI Testing</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ TEAM & CONTRIBUTORS -->
+  <section aria-labelledby="team-title">
+    <div class="section-header">
+      <div class="section-subtitle">Authors &amp; Contributors</div>
+      <h2 class="section-title" id="team-title">Project Leadership &amp; Engineering</h2>
+    </div>
+
+    <div class="team-grid">
+      <!-- Contributor 1: Sakshi -->
+      <div class="contributor-card" style="--avatar-start:#F4A7B9; --avatar-end:#FFD9A0;">
+        <div class="contributor-header">
+          <div class="contributor-avatar">ST</div>
+          <div class="contributor-meta">
+            <h3>Sakshi Singh Tanwar</h3>
+            <div class="contributor-role">Original Creator &amp; Core Foundation</div>
+          </div>
+        </div>
+        <p class="contributor-bio">
+          Designed and engineered the core <strong>Financial Spending Analyzer</strong> framework. Built the end-to-end bank statement parsing pipelines, category classification engine, expense trend heuristics, and statistical spending anomaly detection algorithms.
+        </p>
+        <div class="contributor-links">
+          <a href="https://github.com/slashthose" target="_blank" rel="noopener noreferrer" class="social-btn github" aria-label="Sakshi Singh Tanwar GitHub">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+          <a href="https://www.linkedin.com/in/sakshi-singh-tanwar/" target="_blank" rel="noopener noreferrer" class="social-btn linkedin" aria-label="Sakshi Singh Tanwar LinkedIn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://github.com/slashthose/Financial-Spending-Analyzer" target="_blank" rel="noopener noreferrer" class="social-btn repo" aria-label="Original Financial Spending Analyzer Repository">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9"/><path d="M12 12v3"/></svg>
+            Original Repo
+          </a>
+        </div>
+      </div>
+
+      <!-- Contributor 2: Sezar -->
+      <div class="contributor-card" style="--avatar-start:#4F46E5; --avatar-end:#C9B8E8;">
+        <div class="contributor-header">
+          <div class="contributor-avatar">STG</div>
+          <div class="contributor-meta">
+            <h3>Sezar (Jyotishman)</h3>
+            <div class="contributor-role">Mutual Fund AI &amp; Tri-Hybrid RAG Contributor</div>
+          </div>
+        </div>
+        <p class="contributor-bio">
+          Architected and implemented the <strong>Mutual Fund Intelligence Layer</strong>, Tri-Hybrid RAG routing pipeline, Newton-Raphson XIRR quant engine, SEBI short-vintage compounding baseline, Budget 2024 taxation engine, and the interactive Claude/Groww G.1 visual Chatbot advisor.
+        </p>
+        <div class="contributor-links">
+          <a href="https://github.com/SezarTheGreat" target="_blank" rel="noopener noreferrer" class="social-btn github" aria-label="Sezar (Jyotishman) GitHub">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+          <a href="https://www.linkedin.com/in/sezarthegreat/" target="_blank" rel="noopener noreferrer" class="social-btn linkedin" aria-label="Sezar (Jyotishman) LinkedIn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://github.com/SezarTheGreat/Financial-Spending-Analyzer" target="_blank" rel="noopener noreferrer" class="social-btn repo" aria-label="Extended Financial Spending Analyzer Repository">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9"/><path d="M12 12v3"/></svg>
+            Extended Repo
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ COMPLIANCE & FOOTER -->
+<footer class="about-footer">
+  <div class="footer-badges">
+    <span class="badge-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Open Source MIT License
+    </span>
+    <span class="badge-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Budget 2024 (AY 2025-26) Compliant
+    </span>
+    <span class="badge-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      SEBI (RIA) Regulations 2013 Aligned
+    </span>
+  </div>
+  <p class="disclaimer-text">
+    *Disclaimer: FinWise is an institutional analytical research engine and portfolio diagnostic system. It does not provide registered investment advice under SEBI (Investment Advisers) Regulations, 2013. Mutual fund investments are subject to market risks. Read all scheme-related documents carefully before investing.*
+  </p>
+  <p class="copyright-text">
+    © 2024–2026 FinWise Platform • Crafted by Sakshi Singh Tanwar &amp; Sezar (Jyotishman)
+  </p>
+</footer>
+
+</body>
+</html>

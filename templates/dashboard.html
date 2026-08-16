@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FinWise — Institutional Portfolio & Spending Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="alternate icon" href="/static/favicon.ico">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -19,7 +22,9 @@
 <!-- ═══════════════════════════════════════════════════ LEFT SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-brand">
-    <span class="brand-logo">Fin<em>Wise</em></span>
+    <a href="/" style="text-decoration:none; color:inherit; display:flex; align-items:center;">
+      <span class="brand-logo">Fin<em>Wise</em></span>
+    </a>
     <div class="brand-dot"></div>
   </div>
 
@@ -58,6 +63,9 @@
     <div class="nav-section-label" style="margin-top:20px">Navigation</div>
     <a href="/" class="nav-item">
       <span class="nav-icon">↩</span> Upload New Statement
+    </a>
+    <a href="/about" class="nav-item">
+      <span class="nav-icon">ℹ</span> About &amp; Authors
     </a>
   </nav>
 

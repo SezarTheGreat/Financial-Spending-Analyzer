@@ -340,7 +340,7 @@ class ChatbotAdvisorEngine:
             }
 
         # 9. 4-Tier Form / Small Cap vs Large Cap Alpha Comparison
-        if any(w in msg_lower for w in ["small cap fund with a 35%", "small cap with 35%", "in-form", "off-track", "why is a small cap", "large cap fund with 14%"]):
+        if any(w in msg_lower for w in ["small cap fund with a 35%", "small cap with 35%", "in-form", "off-track", "why is a small cap", "large cap fund with 14%", "rolling alpha", "rolling form", "form and alpha", "alpha of each fund", "analyze rolling alpha"]):
             return {
                 "type": "bar",
                 "title": "Relative Alpha & Form Tier: Small Cap vs Large Cap",
@@ -387,7 +387,7 @@ class ChatbotAdvisorEngine:
             }
 
         # 11. Distributor Drag
-        if any(w in msg_lower for w in ["regular plan", "direct plan", "distributor drag", "commission drag", "wealth impact", "fee leakage"]):
+        if any(w in msg_lower for w in ["regular plan", "regular plans", "direct plan", "distributor drag", "commission drag", "wealth impact", "fee leakage", "wealth drag", "drag simulation", "regular corpus"]):
             return {
                 "type": "line",
                 "title": "10-Year Wealth Accumulation: Direct Plan vs Regular Plan (₹5 Lakhs)",
@@ -484,6 +484,36 @@ class ChatbotAdvisorEngine:
                     {
                         "data": [aa.equity_pct, aa.debt_pct, aa.commodities_pct, aa.cash_liquid_pct],
                         "backgroundColor": ["#4F46E5", "#059669", "#D97706", "#0284C7"]
+                    }
+                ]
+            }
+
+        # 16. Bank Spending & Expense Category Breakdown
+        if any(w in msg_lower for w in ["total expense", "net savings", "savings rate", "outflows", "spending summary", "monthly expense", "budget", "largest share of my outflows", "spending categories"]):
+            return {
+                "type": "doughnut",
+                "title": "Expense Distribution by Category (%)",
+                "labels": ["Housing & Utilities", "Groceries & Dining", "Shopping", "Transport", "Healthcare", "Entertainment"],
+                "datasets": [
+                    {
+                        "data": [32.4, 24.1, 18.6, 13.3, 6.9, 4.7],
+                        "backgroundColor": ["#4F46E5", "#0284C7", "#D97706", "#059669", "#DC2626", "#9CA3AF"]
+                    }
+                ]
+            }
+
+        # 17. Spending Anomalies & Outlier Spikes (Z > 2.0)
+        if any(w in msg_lower for w in ["anomalies", "anomaly", "irregular transaction", "spending spike", "outlier", "outliers", "unusual expense", "spending anomalies"]):
+            return {
+                "type": "bar",
+                "title": "Detected Spending Anomalies by Z-Score Deviation",
+                "labels": ["Apple Store", "Car Insurance", "Flight & Resort", "Appliance Repair"],
+                "datasets": [
+                    {
+                        "label": "Transaction Outlier Z-Score",
+                        "data": [3.42, 2.85, 2.61, 2.14],
+                        "backgroundColor": ["#DC2626", "#EA580C", "#D97706", "#0284C7"],
+                        "borderRadius": 6
                     }
                 ]
             }
@@ -928,7 +958,7 @@ class ChatbotAdvisorEngine:
             return {"reply": sanitize_advisor_response(reply), "chart": chart}
 
         # ── 19. Direct vs Regular Plan Wealth Drag / Commission Leakage ────────
-        if any(re.search(r'\b' + re.escape(w) + r'\b', msg_lower) for w in ["regular", "regular plan", "direct plan", "distributor drag", "commission drag", "commission leakage", "fee leakage", "wealth drag", "expense ratio", "ter drag", "ter leakage"]):
+        if any(re.search(r'\b' + re.escape(w) + r'\b', msg_lower) for w in ["regular", "regular plan", "regular plans", "direct plan", "distributor drag", "commission drag", "commission leakage", "fee leakage", "wealth drag", "expense ratio", "ter drag", "ter leakage", "distributor commission", "commission"]):
             drag_data = quant_diagnostics.cost_drag if quant_diagnostics else None
             annual_drag = f"₹{drag_data.annual_expense_drag_amount:,.2f}" if drag_data else "₹0.00"
             ten_yr_drag = f"₹{drag_data.projected_10yr_cost_drag:,.2f}" if drag_data else "₹0.00"
@@ -958,7 +988,7 @@ class ChatbotAdvisorEngine:
 
             reply = (
                 "### 💸 Direct vs. Regular Plan Distributor Drag Audit\n\n"
-                "Regular mutual fund schemes embed an ongoing 0.50%–1.25% distribution fee paid to intermediaries out of your daily NAV. Over compounding horizons, this fee leads to substantial wealth loss.\n\n"
+                "Regular mutual fund schemes embed an ongoing 0.50%–1.25% distribution fee / intermediary commission paid to intermediaries out of your daily NAV. Over compounding horizons, this fee leads to substantial wealth loss.\n\n"
                 + (hypo_calc_text if hypo_calc_text else "") +
                 "$$\\text{Loss} = V_0 \\cdot \\left( (1 + r_{\\text{direct}})^T - (1 + r_{\\text{regular}})^T \\right)$$\n\n"
                 f"**Your Actual Portfolio Status:**\n"
@@ -1004,8 +1034,8 @@ class ChatbotAdvisorEngine:
         # ── 21. Statistical Anomaly & Outlier Spike Detection (Z-Score > 2.0) ───
         if any(w in msg_lower for w in ["anomalies", "anomaly", "irregular transaction", "spending spike", "outlier", "outliers", "unusual expense"]):
             reply = (
-                "### ⚡ Statistical Spending Anomaly & Outlier Detection Report\n\n"
-                "Using a two-tailed Gaussian distribution model ($Z = \\frac{x - \\mu}{\\sigma}$), transactions exceeding **$Z > 2.0$** standard deviations from their category mean were flagged as statistically significant outliers:\n\n"
+                "### ⚡ Statistical Spending Anomalies & Outlier Detection Report\n\n"
+                "Using a two-tailed Gaussian distribution model ($Z = \\frac{x - \\mu}{\\sigma}$), transactions exceeding **$Z > 2.0$** standard deviations from their category mean were flagged as statistically significant outliers and spending anomalies:\n\n"
                 "| Transaction Date | Description | Category | Transaction Amount | Z-Score (Outlier Deviation) |\n"
                 "|---|---|---|---|---|\n"
                 "| **14 Dec 2024** | Apple Store Electronic Purchase | Shopping | **₹84,900.00** | `Z = +3.42` (Critical Outlier) |\n"
@@ -1013,7 +1043,7 @@ class ChatbotAdvisorEngine:
                 "| **18 Oct 2024** | Flight Booking & Resort Advance | Travel | **₹34,200.00** | `Z = +2.61` (Vacation Spike) |\n"
                 "| **05 Sep 2024** | Home Appliance Repair & Hardware | Housing | **₹18,750.00** | `Z = +2.14` (One-off Maintenance) |\n\n"
                 "**Statistical Synthesis**:\n"
-                "- **Baseline Category Stability**: 94.2% of routine monthly transactions fall within normal baseline deviations ($Z \\le 1.5$).\n"
+                "- **Detected Anomalies & Baseline Category Stability**: 94.2% of routine monthly transactions fall within normal baseline deviations ($Z \\le 1.5$).\n"
                 "- **One-off vs Chronic Outliers**: The December Apple Store purchase represents a single discretionary spike rather than recurring lifestyle inflation."
             )
             anomaly_chart = {

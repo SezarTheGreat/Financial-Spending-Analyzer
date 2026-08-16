@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="fwBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDFBF7"/>
+      <stop offset="100%" stop-color="#F5F0E8"/>
+    </linearGradient>
+    <filter id="fwShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1A1A2E" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <!-- Background rounded squircle -->
+  <rect width="64" height="64" rx="16" fill="url(#fwBg)" stroke="#1A1A2E" stroke-width="1.5" stroke-opacity="0.08"/>
+  
+  <!-- FW Monogram in Brand Typography -->
+  <g filter="url(#fwShadow)">
+    <!-- "F" in dark ink -->
+    <text x="13" y="44" font-family="'Playfair Display', Georgia, 'Times New Roman', serif" font-size="34" font-weight="800" fill="#1A1A2E" letter-spacing="-1">F</text>
+    <!-- "W" in signature blush pink -->
+    <text x="29" y="44" font-family="'Playfair Display', Georgia, 'Times New Roman', serif" font-size="34" font-weight="800" fill="#F4A7B9" letter-spacing="-1">W</text>
+  </g>
+  <!-- Tiny decorative accent dot -->
+  <circle cx="53" cy="24" r="3.5" fill="#F4A7B9"/>
+</svg>
