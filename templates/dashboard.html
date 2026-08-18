@@ -64,7 +64,7 @@
   <div class="sidebar-health" id="sidebarHealthContainer">
     <div class="health-label">Portfolio Health</div>
     <div class="health-ring-wrap">
-      <canvas id="healthRingSidebar" width="80" height="80"></canvas>
+      <canvas id="healthRingSidebar" width="96" height="96"></canvas>
       <div class="health-center-text">
         <span class="health-grade" id="sidebarHealthScore">–</span>
       </div>
@@ -577,6 +577,17 @@
       <div class="card card-blush">
         <div class="card-header"><div class="card-title">Monthly Expenditure</div></div>
         <div class="chart-wrap"><canvas id="incomeExpenseChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Highlighted Week-wise Spending Card -->
+    <div class="card card-weekly-highlight" style="margin-top:20px;">
+      <div class="card-header">
+        <div class="card-title">Week-wise Spending</div>
+        <div class="card-badge badge-teal-highlight" id="weeklyPeakBadgeDashboard">Day Distribution</div>
+      </div>
+      <div class="chart-wrap" style="height:210px">
+        <canvas id="weeklyChartDashboard"></canvas>
       </div>
     </div>
   </section>
