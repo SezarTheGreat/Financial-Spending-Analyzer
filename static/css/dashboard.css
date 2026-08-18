@@ -214,37 +214,96 @@ body.mf-mode.right-sidebar-collapsed {
 
 .sidebar-health {
   margin-top: auto;
-  padding: 16px 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px 14px;
+  background: rgba(26, 26, 46, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
   text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .health-label {
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.55);
-  margin-bottom: 10px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 8px;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 600;
+  letter-spacing: 1.2px;
+  font-weight: 700;
 }
 
 .health-ring-wrap {
   position: relative;
-  display: inline-block;
-  width: 80px;
-  height: 80px;
-  max-width: 80px;
-  max-height: 80px;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin: 10px auto;
+  overflow: visible;
 }
 
 .health-ring-wrap canvas {
-  width: 80px !important;
-  height: 80px !important;
-  max-width: 80px !important;
-  max-height: 80px !important;
+  width: 96px !important;
+  height: 96px !important;
+  display: block;
+}
+
+.health-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.health-score-val {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #F5E642;
+  margin-top: 8px;
+}
+
+/* Highlighted Week-wise Spending Card */
+.card-weekly-highlight {
+  background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+  color: #FEFEFE;
+  border: 1.5px solid rgba(20, 184, 166, 0.4);
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(13, 148, 136, 0.22), 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-weekly-highlight:hover {
+  box-shadow: 0 16px 40px rgba(13, 148, 136, 0.32);
+}
+.card-weekly-highlight .card-title {
+  color: #FFFFFF !important;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.card-weekly-highlight .chart-wrap {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+.badge-teal-highlight {
+  background: #14B8A6;
+  color: #0F172A;
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.4);
+  letter-spacing: 0.3px;
+}eight: 80px !important;
   display: block;
 }
 
