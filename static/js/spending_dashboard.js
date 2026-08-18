@@ -390,14 +390,32 @@ function renderMonthlyChart(d, mode) {
 
 // ── Week-wise Breakdown Chart ────────────────────────────────────
 function renderWeeklyChart(d) {
+  const days = d.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const amounts = d.amounts || [0, 0, 0, 0, 0, 0, 0];
+  const peakDay = d.peak_day || '';
+
+  const badgeEl = document.getElementById('weeklyPeakBadge');
+  if (badgeEl && peakDay) {
+    badgeEl.textContent = `Peak: ${peakDay}`;
+  }
+
+  const bgColors = days.map(day => day === peakDay ? '#0F766E' : '#14B8A6');
+  const borderColors = days.map(day => day === peakDay ? '#022C22' : '#0D9488');
+  const hoverColors = days.map(day => day === peakDay ? '#047857' : '#2DD4BF');
+
   buildChart('weeklyChart', {
     type: 'bar',
     data: {
-      labels: d.days || [],
+      labels: days,
       datasets: [{
-        data: d.amounts || [],
-        backgroundColor: (d.days || []).map(day => day === d.peak_day ? '#0D9488' : '#A8D4D4'),
-        borderRadius: 6
+        label: 'Spending (₹)',
+        data: amounts,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1.5,
+        hoverBackgroundColor: hoverColors,
+        borderRadius: 8,
+        borderSkipped: false
       }]
     },
     options: {
@@ -405,13 +423,29 @@ function renderWeeklyChart(d) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ` Total: ₹${Number(ctx.raw).toLocaleString('en-IN')}` } }
+        tooltip: {
+          backgroundColor: '#0F172A',
+          titleColor: '#2DD4BF',
+          bodyColor: '#FFFFFF',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            label: ctx => ` Total: ₹${Number(ctx.raw).toLocaleString('en-IN')}`
+          }
+        }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11, weight: '700' }, color: '#0F766E' }
+        },
         y: {
-          grid: { color: 'rgba(26,26,46,0.05)' },
-          ticks: { font: { size: 10 }, callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) }
+          grid: { color: 'rgba(15, 118, 110, 0.12)' },
+          ticks: {
+            font: { size: 10, weight: '600' },
+            color: '#0F766E',
+            callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v)
+          }
         }
       }
     }
@@ -582,35 +616,64 @@ function renderHealth(h, tips) {
   `).join('');
 
   // Canvas Health Rings
-  drawHealthRing('healthRingSmall', h.score, 32, 7);
-  drawHealthRing('healthRingBig', h.score, 68, 14);
+  const scoreNumEl = document.getElementById('sidebarScore');
+  if (scoreNumEl) scoreNumEl.textContent = h.score;
+  const gradeEl = document.getElementById('sidebarGrade');
+  if (gradeEl) {
+    const statusText = h.score >= 80 ? 'Optimal (Grade A)' : h.score >= 65 ? 'Solid (Grade B)' : h.score >= 50 ? 'Moderate (Grade C)' : 'At Risk (Grade D)';
+    gradeEl.textContent = statusText;
+    gradeEl.style.color = h.score >= 80 ? '#10B981' : h.score >= 65 ? '#2563EB' : h.score >= 50 ? '#F5E642' : '#F4A7B9';
+  }
+
+  drawHealthRing('healthRingSmall', h.score, 8);
+  drawHealthRing('healthRingBig', h.score, 14);
 }
 
-function drawHealthRing(canvasId, score, radius, lineWidth) {
+function drawHealthRing(canvasId, score, lineWidth) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const cx = canvas.width / 2, cy = canvas.height / 2;
+  
+  const parent = canvas.parentElement;
+  const displayW = parent ? parent.clientWidth || 96 : 96;
+  const displayH = parent ? parent.clientHeight || 96 : 96;
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = displayW * dpr;
+  canvas.height = displayH * dpr;
+  canvas.style.width = displayW + 'px';
+  canvas.style.height = displayH + 'px';
+
+  ctx.save();
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, displayW, displayH);
+
+  const cx = displayW / 2;
+  const cy = displayH / 2;
+  const strokeW = lineWidth || 8;
+  const radius = Math.min(cx, cy) - (strokeW / 2) - 4;
+
   const startAngle = -Math.PI / 2;
-  const endAngle = startAngle + (Math.max(0, Math.min(100, score)) / 100) * Math.PI * 2;
+  const pct = Math.max(0, Math.min(100, score)) / 100;
+  const endAngle = startAngle + (pct * Math.PI * 2);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Background track
+  // Background Ring Track
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-  ctx.lineWidth = lineWidth;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.lineWidth = strokeW;
   ctx.stroke();
 
-  // Score arc
-  const color = score >= 80 ? '#10B981' : score >= 60 ? '#F5E642' : '#F4A7B9';
+  // Progress Ring Arc
+  const color = score >= 80 ? '#10B981' : score >= 65 ? '#2563EB' : score >= 50 ? '#F5E642' : '#F4A7B9';
   ctx.beginPath();
   ctx.arc(cx, cy, radius, startAngle, endAngle);
   ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth;
+  ctx.lineWidth = strokeW;
   ctx.lineCap = 'round';
   ctx.stroke();
+
+  ctx.restore();
 }
 
 // ── Calendar Heatmap (Right Sidebar) ─────────────────────────────
@@ -812,3 +875,4 @@ window.addEventListener('DOMContentLoaded', () => {
 
   loadAllSpendingData();
 });
+
