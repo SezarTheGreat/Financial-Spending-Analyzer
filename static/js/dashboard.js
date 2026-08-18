@@ -297,39 +297,40 @@ function drawDonutRing(canvasId, value, max, fgColor, bgColor) {
   const ctx = canvas.getContext('2d');
   
   const isSidebar = canvasId === 'healthRingSidebar';
-  const logicalW = isSidebar ? 80 : 120;
-  const logicalH = isSidebar ? 80 : 120;
+  const parent = canvas.parentElement;
+  const displayW = parent ? parent.clientWidth || (isSidebar ? 96 : 120) : (isSidebar ? 96 : 120);
+  const displayH = parent ? parent.clientHeight || (isSidebar ? 96 : 120) : (isSidebar ? 96 : 120);
   const dpr = window.devicePixelRatio || 1;
 
-  canvas.width = logicalW * dpr;
-  canvas.height = logicalH * dpr;
-  canvas.style.width = logicalW + 'px';
-  canvas.style.height = logicalH + 'px';
+  canvas.width = displayW * dpr;
+  canvas.height = displayH * dpr;
+  canvas.style.width = displayW + 'px';
+  canvas.style.height = displayH + 'px';
   
   ctx.save();
   ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, logicalW, logicalH);
+  ctx.clearRect(0, 0, displayW, displayH);
 
-  const cx = logicalW / 2;
-  const cy = logicalH / 2;
-  const strokeW = isSidebar ? 7 : 10;
-  const radius = cx - strokeW / 2 - 2;
+  const cx = displayW / 2;
+  const cy = displayH / 2;
+  const strokeW = isSidebar ? 8 : 10;
+  const radius = Math.min(cx, cy) - (strokeW / 2) - 4;
 
-  // Background Ring
+  // Background Ring Track
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
-  ctx.strokeStyle = bgColor;
+  ctx.strokeStyle = bgColor || 'rgba(255, 255, 255, 0.15)';
   ctx.lineWidth = strokeW;
   ctx.stroke();
 
-  // Progress Ring
+  // Progress Ring Arc
   const pct = Math.min(Math.max(value / max, 0), 1);
   const startAngle = -Math.PI / 2;
   const endAngle = startAngle + (2 * Math.PI * pct);
 
   ctx.beginPath();
   ctx.arc(cx, cy, radius, startAngle, endAngle);
-  ctx.strokeStyle = fgColor;
+  ctx.strokeStyle = fgColor || '#2563EB';
   ctx.lineWidth = strokeW;
   ctx.lineCap = 'round';
   ctx.stroke();
@@ -1265,9 +1266,76 @@ async function loadSpendingData() {
     renderSpendingIncomeExpense(ie);
     renderSpendingTrends(trends);
     renderSpendingAnomalies(anomalies);
+    renderSpendingWeekly(weekly);
   } catch (e) {
     console.log('Spending analytics background load notice:', e);
   }
+}
+
+function renderSpendingWeekly(d) {
+  const canvas = document.getElementById('weeklyChartDashboard');
+  if (!canvas || !d) return;
+
+  const days = d.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const amounts = d.amounts || [0, 0, 0, 0, 0, 0, 0];
+  const peakDay = d.peak_day || '';
+
+  const badgeEl = document.getElementById('weeklyPeakBadgeDashboard');
+  if (badgeEl && peakDay) {
+    badgeEl.textContent = `Peak: ${peakDay}`;
+  }
+
+  const bgColors = days.map(day => day === peakDay ? '#0F766E' : '#14B8A6');
+  const borderColors = days.map(day => day === peakDay ? '#022C22' : '#0D9488');
+  const hoverColors = days.map(day => day === peakDay ? '#047857' : '#2DD4BF');
+
+  buildChart('weeklyChartDashboard', {
+    type: 'bar',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'Spending (₹)',
+        data: amounts,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1.5,
+        hoverBackgroundColor: hoverColors,
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0F172A',
+          titleColor: '#2DD4BF',
+          bodyColor: '#FFFFFF',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            label: ctx => ` Total: ₹${Number(ctx.raw).toLocaleString('en-IN')}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11, weight: '700' }, color: '#0F766E' }
+        },
+        y: {
+          grid: { color: 'rgba(15, 118, 110, 0.12)' },
+          ticks: {
+            font: { size: 10, weight: '600' },
+            color: '#0F766E',
+            callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v)
+          }
+        }
+      }
+    }
+  });
 }
 
 function renderSpendingOverview(d) {
@@ -1688,3 +1756,4 @@ async function sendChatMessage() {
     inputEl.focus();
   }
 }
+
