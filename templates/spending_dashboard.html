@@ -65,20 +65,15 @@
   </nav>
 
   <!-- Mini Financial Health Score Gauge Widget -->
-  <div class="sidebar-health">
-    <div class="sidebar-health-header">
-      <span class="sidebar-health-title">Financial Health</span>
-      <span class="sidebar-health-grade" id="sidebarGrade">Grade A</span>
-    </div>
-    <div class="sidebar-health-ring-box">
-      <div style="position:relative; width:64px; height:64px;">
-        <canvas id="healthRingSmall" width="64" height="64"></canvas>
-      </div>
-      <div>
-        <div class="sidebar-health-score" id="sidebarScore">85 / 100</div>
-        <div class="sidebar-health-sub">Healthy Spending</div>
+  <div class="sidebar-health" id="sidebarHealthContainer">
+    <div class="sidebar-health-title">Financial Health</div>
+    <div class="sidebar-health-ring-wrap">
+      <canvas id="healthRingSmall" width="96" height="96"></canvas>
+      <div class="sidebar-health-center-text">
+        <span class="sidebar-health-score-num" id="sidebarScore">85</span>
       </div>
     </div>
+    <div class="sidebar-health-grade-text" id="sidebarGrade">Optimal (Grade A)</div>
   </div>
 </aside>
 
@@ -225,10 +220,10 @@
         </div>
       </div>
 
-      <div class="card card-teal">
+      <div class="card card-weekly-highlight">
         <div class="card-header">
           <div class="card-title">Week-wise Spending</div>
-          <div class="card-badge">Day Distribution</div>
+          <div class="card-badge badge-teal-highlight" id="weeklyPeakBadge">Day Distribution</div>
         </div>
         <div class="chart-wrap" style="height:210px">
           <canvas id="weeklyChart"></canvas>
@@ -372,3 +367,4 @@
 <script src="/static/js/spending_dashboard.js"></script>
 </body>
 </html>
+
