@@ -127,49 +127,54 @@ body {
   flex-shrink: 0;
 }
 
-/* Sidebar mini health gauge */
+/* Sidebar mini health gauge - Matching centered ring design */
 .sidebar-health {
-  background: rgba(255,255,255,0.05);
-  border-radius: 14px;
-  padding: 14px;
-  margin-top: 16px;
-  border: 1px solid rgba(255,255,255,0.08);
-}
-.sidebar-health-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+  background: rgba(26, 26, 46, 0.7);
+  border-radius: 18px;
+  padding: 20px 14px;
+  margin-top: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 .sidebar-health-title {
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: rgba(255,255,255,0.6);
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 8px;
 }
-.sidebar-health-grade {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--butter);
-  color: var(--ink);
-}
-.sidebar-health-ring-box {
+.sidebar-health-ring-wrap {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin: 10px auto;
 }
-.sidebar-health-score {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
+.sidebar-health-ring-wrap canvas {
+  width: 96px !important;
+  height: 96px !important;
+  display: block;
+}
+.sidebar-health-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1;
+  pointer-events: none;
+}
+.sidebar-health-grade-text {
+  font-size: 0.85rem;
   font-weight: 700;
-  color: var(--butter);
-}
-.sidebar-health-sub {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.45);
+  color: #F5E642;
+  margin-top: 8px;
 }
 
 /* ═══ MAIN CONTENT ═══════════════════════════════════════════════ */
@@ -355,6 +360,44 @@ body {
 .card-lavender { background: var(--lavender); }
 .card-peach  { background: var(--peach); }
 .card-teal   { background: var(--teal); }
+
+/* Highlighted Week-wise Spending Card */
+.card-weekly-highlight {
+  background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+  color: #FEFEFE;
+  border: 1.5px solid rgba(20, 184, 166, 0.4);
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(13, 148, 136, 0.22), 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-weekly-highlight:hover {
+  box-shadow: 0 16px 40px rgba(13, 148, 136, 0.32);
+}
+.card-weekly-highlight .card-title {
+  color: #FFFFFF !important;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.card-weekly-highlight .chart-wrap {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+.badge-teal-highlight {
+  background: #14B8A6;
+  color: #0F172A;
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.4);
+  letter-spacing: 0.3px;
+}
 
 /* Donut container */
 .donut-wrap {
@@ -764,3 +807,4 @@ body {
   .stat-grid { grid-template-columns: 1fr 1fr; }
   .row-2, .row-3, .row-4 { grid-template-columns: 1fr; }
 }
+
