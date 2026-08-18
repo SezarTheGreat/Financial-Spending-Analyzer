@@ -356,6 +356,11 @@ def generate_sample_data():
     return df
 
 def save_df(dataframe):
+    """
+    Persist the uploaded/sample DataFrame to Supabase Storage (as Parquet)
+    and register it in the uploads table, while retaining an in-memory session
+    cache for rapid local/serverless fallback.
+    """
     session_id = session.get("session_id")
     if not session_id:
         session_id = str(uuid.uuid4())
@@ -366,15 +371,28 @@ def save_df(dataframe):
     if supabase:
         try:
             upload_id = str(uuid.uuid4())
-            storage_path = f"{session_id}/{upload_id}.csv"
-            csv_bytes = dataframe.to_csv(index=False).encode('utf-8')
-            supabase.storage.from_(UPLOAD_BUCKET).upload(storage_path, csv_bytes, {"content-type": "text/csv"})
-            supabase.table(UPLOADS_TABLE).insert({"session_id": session_id, "storage_path": storage_path}).execute()
+            storage_path = f"{session_id}/{upload_id}.parquet"
+            buf = io.BytesIO()
+            dataframe.to_parquet(buf, index=False)
+            buf.seek(0)
+            supabase.storage.from_(UPLOAD_BUCKET).upload(
+                storage_path,
+                buf.getvalue(),
+                {"content-type": "application/octet-stream"},
+            )
+            supabase.table(UPLOADS_TABLE).insert({
+                "session_id": session_id,
+                "storage_path": storage_path,
+            }).execute()
             session["storage_path"] = storage_path
         except Exception as e:
             print(f"Supabase storage save warning: {e}")
 
 def load_df():
+    """
+    Returns (dataframe, error_message). Attempts in-memory retrieval,
+    then Supabase Storage Parquet/CSV download, falling back to sample data.
+    """
     session_id = session.get("session_id")
     if session_id and session_id in _memory_sessions:
         return _memory_sessions[session_id], None
@@ -383,7 +401,10 @@ def load_df():
     if storage_path and supabase:
         try:
             raw = supabase.storage.from_(UPLOAD_BUCKET).download(storage_path)
-            df = pd.read_csv(io.BytesIO(raw))
+            try:
+                df = pd.read_parquet(io.BytesIO(raw))
+            except Exception:
+                df = pd.read_csv(io.BytesIO(raw))
             df['date'] = pd.to_datetime(df['date'])
             return df, None
         except Exception as e:

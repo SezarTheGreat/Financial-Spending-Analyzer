@@ -198,3 +198,39 @@ def test_mutual_fund_isolation_guardrail(client):
 
     res_port = client.get('/portfolio-analytics')
     assert res_port.status_code == 200
+
+def test_csv_upload_errors(client):
+    """Verify error responses for missing file and invalid file extension."""
+    res_no_file = client.post('/api/upload', data={})
+    assert res_no_file.status_code == 400
+    assert 'error' in res_no_file.get_json()
+
+    data_bad_ext = {
+        'file': (io.BytesIO(b'dummy content'), 'statement.pdf')
+    }
+    res_bad_ext = client.post('/api/upload', data=data_bad_ext, content_type='multipart/form-data')
+    assert res_bad_ext.status_code == 400
+    assert 'error' in res_bad_ext.get_json()
+
+def test_statistical_anomalies_and_health_calculations():
+    """Verify statistical anomaly detection (Z > 2.0) and health score heuristics directly."""
+    from app import preprocess, detect_anomalies, get_health_score, generate_ai_insights, generate_sample_data
+    import pandas as pd
+
+    df = generate_sample_data()
+    assert len(df) > 0
+
+    anomalies = detect_anomalies(df)
+    assert 'anomalies' in anomalies
+    for a in anomalies['anomalies']:
+        assert a['z_score'] > 2.0
+        assert 'date' in a
+        assert 'amount' in a
+
+    health = get_health_score(df)
+    assert 0 <= health['score'] <= 100
+    assert health['grade'] in ['A+', 'A', 'B', 'C', 'D']
+
+    insights = generate_ai_insights(df)
+    assert len(insights['insights']) > 0
+    assert len(insights['tips']) == 3
